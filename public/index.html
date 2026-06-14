@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto-Blogging Portal</title>
+    <title id="siteBrowserTitle">Auto-Blogging Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -11,39 +11,139 @@
     <div class="container">
         <!-- Navigation Header -->
         <header>
-            <div class="logo-group">
-                <h1>Auto-Blogging Portal</h1>
-                <p>ऑटोमेटेड ब्लॉगिंग और कंटेंट हब</p>
+            <div class="logo-group" onclick="showView('home')">
+                <h1 id="siteMainTitle">Loading Title...</h1>
+                <p id="siteTagline">Loading Tagline...</p>
             </div>
             <div class="nav-links">
                 <span class="db-badge" id="dbTypeBadge">Connecting...</span>
                 
                 <!-- Theme Switcher Selector -->
                 <select class="theme-selector" id="themeSelector" onchange="changeTheme(this.value)">
-                    <option value="light">☀️ Light Theme</option>
-                    <option value="dark" selected>🌙 Dark Theme</option>
-                    <option value="system">🖥️ System Theme</option>
+                    <option value="light">☀️ Light</option>
+                    <option value="dark" selected>🌙 Dark</option>
+                    <option value="system">🖥️ System</option>
                 </select>
             </div>
         </header>
 
+        <!-- Static Pages Navigation Links (Mandatory Sections like Blogger/Wix) -->
+        <nav class="static-nav">
+            <span class="static-nav-link active" id="nav-home" onclick="showView('home')">होम (Home)</span>
+            <span class="static-nav-link" id="nav-about" onclick="showView('about')">हमारे बारे में (About)</span>
+            <span class="static-nav-link" id="nav-contact" onclick="showView('contact')">संपर्क करें (Contact)</span>
+            <span class="static-nav-link" id="nav-privacy" onclick="showView('privacy')">गोपनीयता नीति (Privacy Policy)</span>
+            <span class="static-nav-link" id="nav-terms" onclick="showView('terms')">नियम और शर्तें (Terms)</span>
+        </nav>
+
         <!-- Main Blog Posts Section -->
-        <main>
-            <h2 style="font-size: 1.2rem; margin-bottom: 30px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary);">ताज़ा ब्लॉग आर्टिकल्स (Latest Articles)</h2>
-            <div class="posts-grid" id="postsGrid">
-                <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">
-                    Loading articles...
+        <main id="mainView">
+            
+            <!-- Category Filter Bar (Like Medium/Hashnode) -->
+            <div class="category-filter-bar" id="categoryFilterBar">
+                <button class="cat-filter-btn active" onclick="filterCategory('All', this)">All</button>
+                <button class="cat-filter-btn" onclick="filterCategory('Technology', this)">Technology</button>
+                <button class="cat-filter-btn" onclick="filterCategory('Sports', this)">Sports</button>
+                <button class="cat-filter-btn" onclick="filterCategory('Health', this)">Health</button>
+                <button class="cat-filter-btn" onclick="filterCategory('Business', this)">Business</button>
+                <button class="cat-filter-btn" onclick="filterCategory('Science', this)">Science</button>
+                <button class="cat-filter-btn" onclick="filterCategory('General', this)">General</button>
+            </div>
+
+            <!-- Search Container (Like Wix/WordPress search function) -->
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 आर्टिकल्स खोजें (Search posts)..." oninput="handleSearch(this.value)">
                 </div>
             </div>
+
+            <div class="posts-grid" id="postsGrid">
+                <!-- Posts will render here -->
+            </div>
+
+            <!-- Newsletter Box (Ghost/Substack feature) -->
+            <div class="newsletter-box">
+                <h3>📧 साप्ताहिक न्यूज़लेटर (Newsletter)</h3>
+                <p>ताज़ा ब्लॉग और ट्रेंडिंग आर्टिकल्स सीधे अपने इनबॉक्स में प्राप्त करने के लिए सब्सक्राइब करें।</p>
+                <form class="newsletter-form" id="newsletterForm">
+                    <input type="email" id="newsEmail" class="form-control" placeholder="अपना ईमेल दर्ज करें..." required>
+                    <button type="submit" class="btn btn-primary">सब्सक्राइब करें</button>
+                </form>
+            </div>
+        </main>
+
+        <!-- Static About View -->
+        <main id="aboutView" class="static-page-content" style="display: none;">
+            <h2>हमारे बारे में (About Us)</h2>
+            <p>आपका स्वागत है हमारे ऑटो-ब्लॉगिंग पोर्टल पर। यह एक आधुनिक एआई-संचालित ब्लॉगिंग प्लेटफॉर्म है जो दुनिया भर से ताज़ा खबरें, तकनीक, स्वास्थ्य, खेल, व्यापार और विज्ञान से संबंधित उत्कृष्ट विश्लेषण लाता है।</p>
+            <p>हमारा उद्देश्य पाठकों को सूचनाओं से समृद्ध लेख और गुणवत्तापूर्ण सामग्री देना है। हमारी वेबसाइट फ़ायरबेस क्लाउड और अत्याधुनिक टूल्स से सुसज्जित है ताकि आपको एक तेज़ और बिना रुकावट के पठन अनुभव मिल सके।</p>
+        </main>
+
+        <!-- Static Contact View -->
+        <main id="contactView" class="static-page-content" style="display: none;">
+            <h2>संपर्क करें (Contact Us)</h2>
+            <p>यदि आपके पास कोई प्रश्न, सुझाव या सहयोग का विचार है, तो बेझिझक हमसे संपर्क करें।</p>
+            <form id="contactForm" style="max-width: 500px; margin-top: 20px;" onsubmit="handleContactSubmit(event)">
+                <div class="form-group">
+                    <label>आपका नाम</label>
+                    <input type="text" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>आपका ईमेल</label>
+                    <input type="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>संदेश (Message)</label>
+                    <textarea class="form-control" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">संदेश भेजें</button>
+            </form>
+        </main>
+
+        <!-- Static Privacy Policy View -->
+        <main id="privacyView" class="static-page-content" style="display: none;">
+            <h2>गोपनीयता नीति (Privacy Policy)</h2>
+            <p>आपकी गोपनीयता हमारे लिए अत्यंत महत्वपूर्ण है। यह नीति बताती है कि जब आप हमारी वेबसाइट पर आते हैं तो हम आपकी किस प्रकार की जानकारी एकत्र करते हैं:</p>
+            <ul>
+                <li><strong>डेटा संग्रह:</strong> हम केवल वही ईमेल एकत्र करते हैं जिसे आप न्यूज़लेटर के लिए स्वेच्छा से दर्ज करते हैं।</li>
+                <li><strong>कुकीज़:</strong> हम वेबसाइट को बेहतर बनाने और एडमिन सत्रों को सुरक्षित रखने के लिए आवश्यक कुकीज़ का उपयोग करते हैं।</li>
+                <li><strong>सुरक्षा:</strong> हम आपके डेटा को किसी भी तीसरे पक्ष (Third party) के साथ साझा नहीं करते हैं।</li>
+            </ul>
+        </main>
+
+        <!-- Static Terms View -->
+        <main id="termsView" class="static-page-content" style="display: none;">
+            <h2>नियम और शर्तें (Terms & Conditions)</h2>
+            <p>हमारी वेबसाइट का उपयोग करने से पहले कृपया निम्नलिखित शर्तों को पढ़ें:</p>
+            <p>यहाँ दी गई सभी सामग्री सूचनात्मक और शैक्षिक उद्देश्यों के लिए है। एआई द्वारा लिखे गए आर्टिकल्स का उपयोग करने से पहले पाठक को स्वयं विवेक का उपयोग करना चाहिए। इस वेबसाइट की किसी भी सामग्री को हमारी लिखित अनुमति के बिना पुनः प्रकाशित नहीं किया जा सकता।</p>
         </main>
 
         <!-- Footer -->
         <footer>
-            <p>&copy; 2026 ऑटो-ब्लॉगर सिस्टम | सभी अधिकार सुरक्षित।</p>
+            <p>&copy; 2026 <span id="siteFooterTitle">ऑटो-ब्लॉगर</span> | सभी अधिकार सुरक्षित।</p>
         </footer>
     </div>
 
     <script>
+        let selectedCategory = 'All';
+        let searchQuery = '';
+        let timer = null;
+
+        // ----------------------------------------------------
+        // Configuration / Dynamic Settings Loader
+        // ----------------------------------------------------
+        function loadSettings() {
+            fetch('/api/settings')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('siteBrowserTitle').innerText = data.siteTitle;
+                    document.getElementById('siteMainTitle').innerText = data.siteTitle;
+                    document.getElementById('siteTagline').innerText = data.siteTagline;
+                    document.getElementById('siteFooterTitle').innerText = data.siteTitle;
+                });
+        }
+        loadSettings();
+
         // ----------------------------------------------------
         // Theme Management Script
         // ----------------------------------------------------
@@ -69,12 +169,29 @@
         document.getElementById('themeSelector').value = savedTheme;
         applyTheme(savedTheme);
 
-        // Listen for system theme changes dynamically if system is selected
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (document.getElementById('themeSelector').value === 'system') {
                 applyTheme('system');
             }
         });
+
+        // ----------------------------------------------------
+        // Navigation Views Switching (Single Page Tabs)
+        // ----------------------------------------------------
+        function showView(viewId) {
+            const views = ['main', 'about', 'contact', 'privacy', 'terms'];
+            views.forEach(v => {
+                const view = document.getElementById(`${v}View`);
+                if (view) view.style.display = 'none';
+                
+                const link = document.getElementById(`nav-${v}`);
+                if (link) link.classList.remove('active');
+            });
+
+            document.getElementById(`${viewId}View`).style.display = 'block';
+            document.getElementById(`nav-${viewId}`).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
         // ----------------------------------------------------
         // Hidden Admin Secret Key Handler (Ctrl + Shift + Z)
@@ -87,8 +204,46 @@
         });
 
         // ----------------------------------------------------
-        // Toggle Post Full Content Inline
+        // Newsletter Form Handler
         // ----------------------------------------------------
+        document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('newsEmail').value;
+            fetch('/api/subscribers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById('newsletterForm').reset();
+            })
+            .catch(() => {
+                alert('सब्सक्राइब करने में त्रुटि आई।');
+            });
+        });
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            alert('धन्यवाद! आपका संदेश सफलतापूर्वक भेज दिया गया है। हम जल्द ही आपसे संपर्क करेंगे।');
+            document.getElementById('contactForm').reset();
+        }
+
+        // ----------------------------------------------------
+        // Views Count & Social Share
+        // ----------------------------------------------------
+        function recordView(id) {
+            fetch(`/api/posts/${id}/view`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    const viewEl = document.getElementById(`views_${id}`);
+                    if (viewEl && data.views) {
+                        viewEl.innerText = `${data.views} views`;
+                    }
+                });
+        }
+
         window.togglePost = function(id) {
             const excerpt = document.getElementById(`excerpt_${id}`);
             const content = document.getElementById(`content_${id}`);
@@ -98,6 +253,7 @@
                 content.style.display = 'block';
                 excerpt.style.display = 'none';
                 toggleLink.innerHTML = '← छोटी पोस्ट करें';
+                recordView(id); // Record view when fully read
             } else {
                 content.style.display = 'none';
                 excerpt.style.display = 'block';
@@ -106,7 +262,7 @@
         };
 
         // ----------------------------------------------------
-        // Data Fetching Scripts
+        // Data Fetching & Search/Category Filters
         // ----------------------------------------------------
         // Fetch Database Type
         fetch('/api/db-info')
@@ -114,78 +270,112 @@
             .then(data => {
                 const badge = document.getElementById('dbTypeBadge');
                 if (data.dbType === 'firebase') {
-                    badge.innerHTML = '🔥 Firebase Firestore';
+                    badge.innerHTML = '🔥 Firebase';
                     badge.style.borderColor = 'rgba(245, 130, 13, 0.4)';
                     badge.style.color = '#f5820d';
                 } else {
-                    badge.innerHTML = '📁 Local JSON Database';
+                    badge.innerHTML = '📁 Local JSON';
                 }
             })
             .catch(() => {
                 document.getElementById('dbTypeBadge').innerHTML = 'Offline';
             });
 
-        // Fetch and Render Posts
-        fetch('/api/posts')
-            .then(res => res.json())
-            .then(posts => {
-                const grid = document.getElementById('postsGrid');
-                if (posts.length === 0) {
-                    grid.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 50px;">
-                            <h3>कोई ब्लॉग पोस्ट नहीं मिली।</h3>
-                            <p>शॉर्टकट दबाकर एडमिन पैनल खोलें और ब्लॉग पोस्ट लिखना शुरू करें!</p>
-                        </div>
-                    `;
-                    return;
-                }
+        function loadPosts() {
+            const postsGrid = document.getElementById('postsGrid');
+            postsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-secondary);padding:30px;">Loading posts...</div>';
 
-                grid.innerHTML = posts.map(post => {
-                    const date = new Date(post.timestamp).toLocaleDateString('hi-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                    });
-                    
-                    // Generate excerpt
-                    const excerptLength = 220;
-                    const cleanText = post.content.replace(/<[^>]*>/g, ''); // strip HTML if any
-                    const hasExcerpt = cleanText.length > excerptLength;
-                    const excerpt = hasExcerpt ? cleanText.substr(0, excerptLength) + '...' : cleanText;
-                    
-                    return `
-                        <article class="post-card" id="post_${post.id}">
-                            <div class="post-category">${post.category || 'General'}</div>
-                            <h3 class="post-title">${post.title}</h3>
-                            <div class="post-meta">प्रकाशित: ${date}</div>
-                            
-                            <!-- Excerpt View -->
-                            <div class="post-excerpt" id="excerpt_${post.id}">
-                                ${excerpt}
+            let url = `/api/posts?category=${selectedCategory}&search=${encodeURIComponent(searchQuery)}`;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(posts => {
+                    if (posts.length === 0) {
+                        postsGrid.innerHTML = `
+                            <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 50px;">
+                                <h3>कोई आर्टिकल्स नहीं मिले।</h3>
+                                <p>अपनी सर्च क्वेरी बदलें या एडमिन पैनल में नई पोस्ट लिखें!</p>
                             </div>
-                            
-                            <!-- Full Content View (Hidden initially) -->
-                            <div class="post-content" id="content_${post.id}" style="display: none;">
-                                ${post.content}
-                            </div>
-                            
-                            <!-- Read More Link -->
-                            ${hasExcerpt ? `
-                                <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}')">
-                                    पूरी पोस्ट पढ़ें →
-                                </a>
-                            ` : ''}
-                        </article>
-                    `;
-                }).join('');
-            })
-            .catch(err => {
-                document.getElementById('postsGrid').innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; color: var(--danger-color); padding: 50px;">
-                        <h3>त्रुटि: ब्लॉग पोस्ट लोड नहीं हो सकीं।</h3>
-                    </div>
-                `;
-            });
+                        `;
+                        return;
+                    }
+
+                    postsGrid.innerHTML = posts.map(post => {
+                        const date = new Date(post.timestamp).toLocaleDateString('hi-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                        });
+                        
+                        const excerptLength = 220;
+                        const cleanText = post.content.replace(/<[^>]*>/g, '');
+                        const hasExcerpt = cleanText.length > excerptLength;
+                        const excerpt = hasExcerpt ? cleanText.substr(0, excerptLength) + '...' : cleanText;
+                        
+                        const postUrl = encodeURIComponent(window.location.origin + `#post_${post.id}`);
+                        const postText = encodeURIComponent(`Check out this post: ${post.title}`);
+
+                        return `
+                            <article class="post-card" id="post_${post.id}">
+                                <div class="post-category">${post.category || 'General'}</div>
+                                <h3 class="post-title">${post.title}</h3>
+                                <div class="post-meta">प्रकाशित: ${date} | <span id="views_${post.id}">${post.views || 0} views</span></div>
+                                
+                                <!-- Excerpt View -->
+                                <div class="post-excerpt" id="excerpt_${post.id}">
+                                    ${excerpt}
+                                </div>
+                                
+                                <!-- Full Content View -->
+                                <div class="post-content" id="content_${post.id}" style="display: none;">
+                                    ${post.content}
+                                    
+                                    <!-- Social Share Bar (Blogger/Wix share features) -->
+                                    <div class="share-bar">
+                                        <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;">Share this:</span>
+                                        <a href="https://wa.me/?text=${postText}%20${postUrl}" target="_blank" class="share-btn">🟢 WhatsApp</a>
+                                        <a href="https://twitter.com/intent/tweet?url=${postUrl}&text=${postText}" target="_blank" class="share-btn">🔵 Twitter</a>
+                                        <a href="https://www.facebook.com/sharer/sharer.php?u=${postUrl}" target="_blank" class="share-btn">🔷 Facebook</a>
+                                    </div>
+                                </div>
+                                
+                                <!-- Read More -->
+                                ${hasExcerpt ? `
+                                    <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}')">
+                                        पूरी पोस्ट पढ़ें →
+                                    </a>
+                                ` : ''}
+                            </article>
+                        `;
+                    }).join('');
+                })
+                .catch(() => {
+                    postsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--danger-color);padding:30px;">Error loading posts.</div>';
+                });
+        }
+
+        // Handle search input with debouncing
+        function handleSearch(val) {
+            clearTimeout(timer);
+            searchQuery = val;
+            timer = setTimeout(() => {
+                loadPosts();
+            }, 300);
+        }
+
+        // Filter by category
+        function filterCategory(cat, el) {
+            selectedCategory = cat;
+            
+            const buttons = document.querySelectorAll('.cat-filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+
+            loadPosts();
+        }
+
+        // Load posts initially
+        loadPosts();
     </script>
 </body>
 </html>

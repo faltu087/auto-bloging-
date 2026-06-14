@@ -12,8 +12,8 @@
         <!-- Dashboard Header -->
         <header>
             <div class="logo-group">
-                <h1>Admin Dashboard ⚙️</h1>
-                <p>ब्लॉग पोस्ट जोड़ें और प्रबंधित करें</p>
+                <h1 id="headerSiteTitle">Admin Dashboard ⚙️</h1>
+                <p>ऑटोमेटेड ब्लॉगिंग कंट्रोल सेंटर</p>
             </div>
             <div class="nav-links">
                 <a href="/" class="btn btn-secondary">← मुख्य साइट देखें</a>
@@ -21,25 +21,56 @@
             </div>
         </header>
 
-        <div class="admin-layout">
-            <!-- Left Side: Add Post Form -->
+        <!-- Admin Tab Navigation Options (WordPress/Ghost features) -->
+        <nav class="admin-tabs">
+            <button class="admin-tab-btn active" id="tab-posts" onclick="switchTab('posts')">📋 लेख सूची (Posts List)</button>
+            <button class="admin-tab-btn" id="tab-write" onclick="switchTab('write')">📝 नया लेख (Write Blog)</button>
+            <button class="admin-tab-btn" id="tab-subs" onclick="switchTab('subs')">📧 सब्सक्राइबर्स (Subscribers)</button>
+            <button class="admin-tab-btn" id="tab-settings" onclick="switchTab('settings')">⚙️ सेटिंग्स (Settings)</button>
+        </nav>
+
+        <!-- TAB CONTENT 1: POSTS LIST -->
+        <div class="admin-tab-content active" id="content-posts">
+            <h2 style="margin: 0 0 20px 0; font-size: 1.3rem;">सभी ब्लॉग आर्टिकल्स</h2>
+            <div class="admin-list" id="adminPostsList">
+                <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                    Loading posts list...
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT 2: WRITE POST -->
+        <div class="admin-tab-content" id="content-write">
             <div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px;">
-                <h2 style="margin: 0 0 24px 0; font-size: 1.35rem; font-weight: 600;">📝 नया ब्लॉग आर्टिकल लिखें</h2>
+                <h2 style="margin: 0 0 24px 0; font-size: 1.3rem;">📝 नया ब्लॉग आर्टिकल लिखें</h2>
                 <form id="postForm">
                     <div class="form-group">
                         <label for="title">शीर्षक (Blog Title)</label>
                         <input type="text" id="title" class="form-control" placeholder="आर्टिकल का नाम लिखें..." required>
                     </div>
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label for="category">श्रेणी (Category)</label>
+                            <select id="category" class="form-control">
+                                <option value="Technology">Technology</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Health">Health</option>
+                                <option value="Business">Business</option>
+                                <option value="Science">Science</option>
+                                <option value="General" selected>General</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="status">स्थिति (Status)</label>
+                            <select id="status" class="form-control">
+                                <option value="published" selected>पब्लिश (Published)</option>
+                                <option value="draft">ड्राफ्ट (Draft)</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
-                        <label for="category">श्रेणी (Category)</label>
-                        <select id="category" class="form-control">
-                            <option value="Technology">Technology (तकनीक)</option>
-                            <option value="Sports">Sports (खेल)</option>
-                            <option value="Health">Health (स्वास्थ्य)</option>
-                            <option value="Business">Business (व्यापार)</option>
-                            <option value="Science">Science (विज्ञान)</option>
-                            <option value="General" selected>General (सामान्य)</option>
-                        </select>
+                        <label for="seoDescription">SEO डिस्क्रिप्शन (Meta Description) - *खोज रैंकिंग के लिए*</label>
+                        <input type="text" id="seoDescription" class="form-control" placeholder="ब्लॉग के बारे में छोटा 1-line सारांश लिखें...">
                     </div>
                     <div class="form-group">
                         <label for="content">कंटेंट (Blog Content)</label>
@@ -48,15 +79,41 @@
                     <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">पब्लिश करें 🚀</button>
                 </form>
             </div>
+        </div>
 
-            <!-- Right Side: Post List Management -->
-            <div>
-                <h2 style="margin: 0 0 24px 0; font-size: 1.35rem; font-weight: 600;">📋 सभी ब्लॉग आर्टिकल्स</h2>
-                <div class="admin-list" id="adminPostsList">
-                    <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                        Loading posts list...
-                    </div>
+        <!-- TAB CONTENT 3: SUBSCRIBERS LIST -->
+        <div class="admin-tab-content" id="content-subs">
+            <h2 style="margin: 0 0 20px 0; font-size: 1.3rem;">न्यूज़लेटर सब्सक्राइबर्स सूची</h2>
+            <div class="admin-list" id="subscribersList">
+                <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                    Loading subscribers list...
                 </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT 4: SETTINGS PANEL -->
+        <div class="admin-tab-content" id="content-settings">
+            <div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px;">
+                <h2 style="margin: 0 0 24px 0; font-size: 1.3rem;">⚙️ वेबसाइट कॉन्फ़िगरेशन</h2>
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label for="siteTitle">वेबसाइट का शीर्षक (Site Title)</label>
+                        <input type="text" id="siteTitle" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="siteTagline">टैगलाइन (Site Tagline)</label>
+                        <input type="text" id="siteTagline" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="siteDescription">वेबसाइट का विवरण (Site Description)</label>
+                        <textarea id="siteDescription" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group" style="padding-top: 15px; border-top: 1px dashed var(--border-color)">
+                        <label for="adminPassword">नया एडमिन पासवर्ड बदलें (Change Password)</label>
+                        <input type="password" id="adminPassword" class="form-control" placeholder="सुरक्षा पासवर्ड बदलने के लिए नया पासवर्ड दर्ज करें (वैकल्पिक)">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">सेटिंग्स सहेजें (Save Settings)</button>
+                </form>
             </div>
         </div>
     </div>
@@ -73,12 +130,126 @@
             document.body.classList.add(`theme-${theme}`);
         }
 
-        // Fetch and Render Posts for Admin view
+        // ----------------------------------------------------
+        // Tab Switcher Controller
+        // ----------------------------------------------------
+        function switchTab(tabId) {
+            const tabs = ['posts', 'write', 'subs', 'settings'];
+            tabs.forEach(t => {
+                document.getElementById(`tab-${t}`).classList.remove('active');
+                document.getElementById(`content-${t}`).classList.remove('active');
+            });
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`content-${tabId}`).classList.add('active');
+
+            if (tabId === 'posts') loadAdminPosts();
+            if (tabId === 'subs') loadSubscribers();
+            if (tabId === 'settings') loadSettingsForm();
+        }
+
+        // ----------------------------------------------------
+        // Settings Loader & Saver (Wix/Blogger setup panel)
+        // ----------------------------------------------------
+        function loadSettingsForm() {
+            fetch('/api/settings')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('siteTitle').value = data.siteTitle || '';
+                    document.getElementById('siteTagline').value = data.siteTagline || '';
+                    document.getElementById('siteDescription').value = data.siteDescription || '';
+                });
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const siteTitle = document.getElementById('siteTitle').value;
+            const siteTagline = document.getElementById('siteTagline').value;
+            const siteDescription = document.getElementById('siteDescription').value;
+            const adminPassword = document.getElementById('adminPassword').value;
+
+            const payload = { siteTitle, siteTagline, siteDescription };
+            if (adminPassword.trim() !== '') {
+                payload.adminPassword = adminPassword;
+            }
+
+            fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('सेटिंग्स सफलतापूर्वक सहेजी गईं!');
+                    document.getElementById('adminPassword').value = '';
+                    document.getElementById('headerSiteTitle').innerText = data.settings.siteTitle + ' ⚙️';
+                } else {
+                    alert('त्रुटि: सेटिंग्स सहेजने में विफल।');
+                }
+            })
+            .catch(() => {
+                alert('सर्वर से जुड़ने में असमर्थ।');
+            });
+        });
+
+        // ----------------------------------------------------
+        // Newsletter Subscribers (Ghost style management)
+        // ----------------------------------------------------
+        function loadSubscribers() {
+            const list = document.getElementById('subscribersList');
+            list.innerHTML = '<div style="text-align:center;padding:20px;">Loading subscribers...</div>';
+
+            fetch('/api/subscribers')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        list.innerHTML = '<div style="text-align:center;padding:30px;border:1px solid var(--border-color);border-radius:8px;background:var(--card-bg)">कोई ईमेल सब्सक्राइबर नहीं मिला।</div>';
+                        return;
+                    }
+
+                    list.innerHTML = data.map(sub => {
+                        const date = new Date(sub.timestamp).toLocaleDateString('hi-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                        });
+                        return `
+                            <div class="admin-post-item">
+                                <div class="admin-post-info">
+                                    <h3>${sub.email}</h3>
+                                    <p>सब्सक्राइब तिथि: ${date}</p>
+                                </div>
+                                <button class="btn btn-danger" onclick="deleteSubscriber('${sub.id}')">हटाएं 🗑️</button>
+                            </div>
+                        `;
+                    }).join('');
+                })
+                .catch(() => {
+                    list.innerHTML = 'लोड करने में असमर्थ।';
+                });
+        }
+
+        window.deleteSubscriber = function(id) {
+            if (confirm('क्या आप इस ईमेल को सब्सक्राइबर सूची से हटाना चाहते हैं?')) {
+                fetch(`/api/subscribers/${id}`, { method: 'DELETE' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) loadSubscribers();
+                        else alert('हटाने में असफल।');
+                    });
+            }
+        };
+
+        // ----------------------------------------------------
+        // Blog Posts Management
+        // ----------------------------------------------------
         function loadAdminPosts() {
+            const list = document.getElementById('adminPostsList');
+            list.innerHTML = '<div style="text-align:center;padding:20px;">Loading posts...</div>';
+
             fetch('/api/posts')
                 .then(res => res.json())
                 .then(posts => {
-                    const list = document.getElementById('adminPostsList');
                     if (posts.length === 0) {
                         list.innerHTML = `
                             <div style="text-align: center; color: var(--text-secondary); padding: 40px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg)">
@@ -93,11 +264,15 @@
                             day: 'numeric',
                             month: 'short'
                         });
+                        
+                        const isDraft = post.status === 'draft';
+                        const draftBadge = isDraft ? '<span class="badge-draft">Draft</span>' : '';
+
                         return `
                             <div class="admin-post-item">
                                 <div class="admin-post-info">
-                                    <h3>${post.title}</h3>
-                                    <p>${post.category || 'General'} | पब्लिश तिथि: ${date}</p>
+                                    <h3>${draftBadge}${post.title}</h3>
+                                    <p>${post.category || 'General'} | पब्लिश: ${date} | 👁️ ${post.views || 0} views</p>
                                 </div>
                                 <button class="btn btn-danger" onclick="deletePost('${post.id}')">हटाएं 🗑️</button>
                             </div>
@@ -105,21 +280,23 @@
                     }).join('');
                 })
                 .catch(() => {
-                    document.getElementById('adminPostsList').innerHTML = 'लोड करने में असमर्थ।';
+                    list.innerHTML = 'लोड करने में असमर्थ।';
                 });
         }
 
-        // Form Submit Handler (Create Post)
+        // Form Submit (Write Blog)
         document.getElementById('postForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const title = document.getElementById('title').value;
             const category = document.getElementById('category').value;
+            const status = document.getElementById('status').value;
+            const seoDescription = document.getElementById('seoDescription').value;
             const content = document.getElementById('content').value;
 
             fetch('/api/posts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, category, content })
+                body: JSON.stringify({ title, category, status, seoDescription, content })
             })
             .then(res => {
                 if (res.status === 401) {
@@ -131,11 +308,11 @@
             })
             .then(data => {
                 if (data && data.success) {
-                    alert('ब्लॉग सफलतापूर्वक पब्लिश हो गया!');
+                    alert('ब्लॉग सफलतापूर्वक सहेजा गया!');
                     document.getElementById('postForm').reset();
-                    loadAdminPosts();
+                    switchTab('posts'); // switch back to posts list
                 } else {
-                    alert('एरर: ' + (data ? data.error : 'पब्लिश नहीं हो सका'));
+                    alert('एरर: ' + (data ? data.error : 'सहेजने में विफल'));
                 }
             })
             .catch(() => {
@@ -143,12 +320,9 @@
             });
         });
 
-        // Delete Post Function
         window.deletePost = function(id) {
             if (confirm('क्या आप सच में इस ब्लॉग पोस्ट को हटाना चाहते हैं?')) {
-                fetch(`/api/posts/${id}`, {
-                    method: 'DELETE'
-                })
+                fetch(`/api/posts/${id}`, { method: 'DELETE' })
                 .then(res => {
                     if (res.status === 401) {
                         alert('सेशन समाप्त हो गया। फिर से लॉगिन करें।');
@@ -170,13 +344,20 @@
             }
         };
 
-        // Logout Button Handler
+        // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             fetch('/api/logout', { method: 'POST' })
                 .then(() => {
                     window.location.href = '/login';
                 });
         });
+
+        // Initialize header title dynamically
+        fetch('/api/settings')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('headerSiteTitle').innerText = data.siteTitle + ' ⚙️';
+            });
 
         // Load initially
         loadAdminPosts();
