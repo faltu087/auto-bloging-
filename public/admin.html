@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="theme-dark">
     <div class="container">
         <!-- Dashboard Header -->
         <header>
@@ -23,8 +23,8 @@
 
         <div class="admin-layout">
             <!-- Left Side: Add Post Form -->
-            <div class="card">
-                <h2 style="margin-bottom: 20px;">📝 नया ब्लॉग आर्टिकल लिखें</h2>
+            <div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px;">
+                <h2 style="margin: 0 0 24px 0; font-size: 1.35rem; font-weight: 600;">📝 नया ब्लॉग आर्टिकल लिखें</h2>
                 <form id="postForm">
                     <div class="form-group">
                         <label for="title">शीर्षक (Blog Title)</label>
@@ -45,13 +45,13 @@
                         <label for="content">कंटेंट (Blog Content)</label>
                         <textarea id="content" class="form-control" rows="8" placeholder="ब्लॉग पोस्ट लिखना शुरू करें..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">पब्लिश करें 🚀</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">पब्लिश करें 🚀</button>
                 </form>
             </div>
 
             <!-- Right Side: Post List Management -->
             <div>
-                <h2 style="margin-bottom: 20px;">📋 सभी ब्लॉग आर्टिकल्स</h2>
+                <h2 style="margin: 0 0 24px 0; font-size: 1.35rem; font-weight: 600;">📋 सभी ब्लॉग आर्टिकल्स</h2>
                 <div class="admin-list" id="adminPostsList">
                     <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
                         Loading posts list...
@@ -62,6 +62,17 @@
     </div>
 
     <script>
+        // Apply saved theme
+        const theme = localStorage.getItem('blog_theme') || 'dark';
+        if (theme === 'system') {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.body.classList.remove('theme-light', 'theme-dark');
+            document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
+        } else {
+            document.body.classList.remove('theme-light', 'theme-dark');
+            document.body.classList.add(`theme-${theme}`);
+        }
+
         // Fetch and Render Posts for Admin view
         function loadAdminPosts() {
             fetch('/api/posts')
@@ -70,7 +81,7 @@
                     const list = document.getElementById('adminPostsList');
                     if (posts.length === 0) {
                         list.innerHTML = `
-                            <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                            <div style="text-align: center; color: var(--text-secondary); padding: 40px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg)">
                                 कोई आर्टिकल्स नहीं मिले।
                             </div>
                         `;

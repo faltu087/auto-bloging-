@@ -7,32 +7,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="theme-dark">
     <div class="container">
         <header>
             <div class="logo-group">
                 <h1>Auto-Blogging Portal</h1>
-                <p>एडमिन लॉगिन क्षेत्र</p>
+                <p>प्रशासक लॉगिन क्षेत्र (Admin Area)</p>
             </div>
             <a href="/" class="btn btn-secondary">← मुख्य साइट</a>
         </header>
 
         <div class="auth-wrapper">
-            <div class="card auth-card">
-                <h2 style="margin-bottom: 25px;">🔒 एडमिन लॉगिन</h2>
+            <div class="auth-card">
+                <h2 style="margin: 0 0 24px 0; font-size: 1.35rem; font-weight: 600;">🔒 एडमिन लॉगिन</h2>
                 <form id="loginForm">
                     <div class="form-group">
-                        <label for="password">पासवर्ड दर्ज करें (Enter Password)</label>
+                        <label for="password">सुरक्षा पासवर्ड दर्ज करें (Enter Password)</label>
                         <input type="password" id="password" class="form-control" placeholder="••••" required autofocus>
                     </div>
-                    <div id="errorMsg" style="color: var(--danger-color); font-size: 0.9rem; margin-bottom: 15px; display: none;"></div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">लॉगिन करें</button>
+                    <div id="errorMsg" style="color: var(--danger-color); font-size: 0.85rem; margin-bottom: 15px; display: none;"></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 10px;">लॉगिन करें</button>
                 </form>
             </div>
         </div>
     </div>
 
     <script>
+        // Apply saved theme
+        const theme = localStorage.getItem('blog_theme') || 'dark';
+        if (theme === 'system') {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.body.classList.remove('theme-light', 'theme-dark');
+            document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
+        } else {
+            document.body.classList.remove('theme-light', 'theme-dark');
+            document.body.classList.add(`theme-${theme}`);
+        }
+
+        // Login Submit Action
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const password = document.getElementById('password').value;

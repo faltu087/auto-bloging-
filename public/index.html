@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="theme-dark">
     <div class="container">
         <!-- Navigation Header -->
         <header>
@@ -17,15 +17,20 @@
             </div>
             <div class="nav-links">
                 <span class="db-badge" id="dbTypeBadge">Connecting...</span>
-                <a href="/admin" class="btn btn-primary">एडमिन पैनल ⚙️</a>
+                
+                <!-- Professional Theme Switcher Selector -->
+                <select class="theme-selector" id="themeSelector" onchange="changeTheme(this.value)">
+                    <option value="light">☀️ Light Theme</option>
+                    <option value="dark" selected>🌙 Dark Theme</option>
+                    <option value="system">🖥️ System Theme</option>
+                </select>
             </div>
         </header>
 
         <!-- Main Blog Posts Section -->
         <main>
-            <h2 style="font-size: 1.5rem; margin-bottom: 25px;">ताज़ा ब्लॉग आर्टिकल्स (Latest Articles)</h2>
+            <h2 style="font-size: 1.35rem; margin-bottom: 25px; font-weight: 600;">ताज़ा ब्लॉग आर्टिकल्स (Latest Articles)</h2>
             <div class="posts-grid" id="postsGrid">
-                <!-- Posts will be dynamically inserted here -->
                 <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">
                     Loading articles...
                 </div>
@@ -39,6 +44,51 @@
     </div>
 
     <script>
+        // ----------------------------------------------------
+        // Theme Management Script
+        // ----------------------------------------------------
+        function applyTheme(theme) {
+            const body = document.body;
+            body.classList.remove('theme-light', 'theme-dark');
+            
+            if (theme === 'system') {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                body.classList.add(isDark ? 'theme-dark' : 'theme-light');
+            } else {
+                body.classList.add(`theme-${theme}`);
+            }
+        }
+
+        function changeTheme(theme) {
+            localStorage.setItem('blog_theme', theme);
+            applyTheme(theme);
+        }
+
+        // Initialize Theme
+        const savedTheme = localStorage.getItem('blog_theme') || 'dark';
+        document.getElementById('themeSelector').value = savedTheme;
+        applyTheme(savedTheme);
+
+        // Listen for system theme changes dynamically if system is selected
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (document.getElementById('themeSelector').value === 'system') {
+                applyTheme('system');
+            }
+        });
+
+        // ----------------------------------------------------
+        // Hidden Admin Secret Key Handler (Ctrl + Shift + Z)
+        // ----------------------------------------------------
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                window.location.href = '/login';
+            }
+        });
+
+        // ----------------------------------------------------
+        // Data Fetching Scripts
+        // ----------------------------------------------------
         // Fetch Database Type
         fetch('/api/db-info')
             .then(res => res.json())
@@ -46,9 +96,8 @@
                 const badge = document.getElementById('dbTypeBadge');
                 if (data.dbType === 'firebase') {
                     badge.innerHTML = '🔥 Firebase Firestore';
-                    badge.style.borderColor = '#f5820d';
+                    badge.style.borderColor = 'rgba(245, 130, 13, 0.4)';
                     badge.style.color = '#f5820d';
-                    badge.style.background = 'rgba(245, 130, 13, 0.1)';
                 } else {
                     badge.innerHTML = '📁 Local JSON Database';
                 }
@@ -66,7 +115,7 @@
                     grid.innerHTML = `
                         <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 50px;">
                             <h3>कोई ब्लॉग पोस्ट नहीं मिली।</h3>
-                            <p>एडमिन पैनल में लॉगिन करके पहली ब्लॉग पोस्ट लिखें!</p>
+                            <p>शॉर्टकट दबाकर एडमिन पैनल खोलें और ब्लॉग पोस्ट लिखना शुरू करें!</p>
                         </div>
                     `;
                     return;
