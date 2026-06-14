@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Blogging Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation Header -->
+        <header>
+            <div class="logo-group">
+                <h1>Auto-Blogging Portal</h1>
+                <p>ऑटोमेटेड ब्लॉगिंग और कंटेंट हब</p>
+            </div>
+            <div class="nav-links">
+                <span class="db-badge" id="dbTypeBadge">Connecting...</span>
+                <a href="/admin" class="btn btn-primary">एडमिन पैनल ⚙️</a>
+            </div>
+        </header>
+
+        <!-- Main Blog Posts Section -->
+        <main>
+            <h2 style="font-size: 1.5rem; margin-bottom: 25px;">ताज़ा ब्लॉग आर्टिकल्स (Latest Articles)</h2>
+            <div class="posts-grid" id="postsGrid">
+                <!-- Posts will be dynamically inserted here -->
+                <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">
+                    Loading articles...
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 ऑटो-ब्लॉगर सिस्टम | सभी अधिकार सुरक्षित।</p>
+        </footer>
+    </div>
+
+    <script>
+        // Fetch Database Type
+        fetch('/api/db-info')
+            .then(res => res.json())
+            .then(data => {
+                const badge = document.getElementById('dbTypeBadge');
+                if (data.dbType === 'firebase') {
+                    badge.innerHTML = '🔥 Firebase Firestore';
+                    badge.style.borderColor = '#f5820d';
+                    badge.style.color = '#f5820d';
+                    badge.style.background = 'rgba(245, 130, 13, 0.1)';
+                } else {
+                    badge.innerHTML = '📁 Local JSON Database';
+                }
+            })
+            .catch(() => {
+                document.getElementById('dbTypeBadge').innerHTML = 'Offline';
+            });
+
+        // Fetch and Render Posts
+        fetch('/api/posts')
+            .then(res => res.json())
+            .then(posts => {
+                const grid = document.getElementById('postsGrid');
+                if (posts.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 50px;">
+                            <h3>कोई ब्लॉग पोस्ट नहीं मिली।</h3>
+                            <p>एडमिन पैनल में लॉगिन करके पहली ब्लॉग पोस्ट लिखें!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = posts.map(post => {
+                    const date = new Date(post.timestamp).toLocaleDateString('hi-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    
+                    return `
+                        <article class="post-card">
+                            <div class="post-category">${post.category || 'General'}</div>
+                            <h3 class="post-title">${post.title}</h3>
+                            <div class="post-meta">प्रकाशित: ${date}</div>
+                            <div class="post-content">${post.content}</div>
+                        </article>
+                    `;
+                }).join('');
+            })
+            .catch(err => {
+                document.getElementById('postsGrid').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; color: var(--danger-color); padding: 50px;">
+                        <h3>त्रुटि: ब्लॉग पोस्ट लोड नहीं हो सकीं।</h3>
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html>

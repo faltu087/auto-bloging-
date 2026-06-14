@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Auto-Blogging</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard Header -->
+        <header>
+            <div class="logo-group">
+                <h1>Admin Dashboard ⚙️</h1>
+                <p>ब्लॉग पोस्ट जोड़ें और प्रबंधित करें</p>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="btn btn-secondary">← मुख्य साइट देखें</a>
+                <button class="btn btn-danger" id="logoutBtn">लॉगआउट (Logout)</button>
+            </div>
+        </header>
+
+        <div class="admin-layout">
+            <!-- Left Side: Add Post Form -->
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">📝 नया ब्लॉग आर्टिकल लिखें</h2>
+                <form id="postForm">
+                    <div class="form-group">
+                        <label for="title">शीर्षक (Blog Title)</label>
+                        <input type="text" id="title" class="form-control" placeholder="आर्टिकल का नाम लिखें..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">श्रेणी (Category)</label>
+                        <select id="category" class="form-control">
+                            <option value="Technology">Technology (तकनीक)</option>
+                            <option value="Sports">Sports (खेल)</option>
+                            <option value="Health">Health (स्वास्थ्य)</option>
+                            <option value="Business">Business (व्यापार)</option>
+                            <option value="Science">Science (विज्ञान)</option>
+                            <option value="General" selected>General (सामान्य)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">कंटेंट (Blog Content)</label>
+                        <textarea id="content" class="form-control" rows="8" placeholder="ब्लॉग पोस्ट लिखना शुरू करें..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">पब्लिश करें 🚀</button>
+                </form>
+            </div>
+
+            <!-- Right Side: Post List Management -->
+            <div>
+                <h2 style="margin-bottom: 20px;">📋 सभी ब्लॉग आर्टिकल्स</h2>
+                <div class="admin-list" id="adminPostsList">
+                    <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                        Loading posts list...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch and Render Posts for Admin view
+        function loadAdminPosts() {
+            fetch('/api/posts')
+                .then(res => res.json())
+                .then(posts => {
+                    const list = document.getElementById('adminPostsList');
+                    if (posts.length === 0) {
+                        list.innerHTML = `
+                            <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                                कोई आर्टिकल्स नहीं मिले।
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    list.innerHTML = posts.map(post => {
+                        const date = new Date(post.timestamp).toLocaleDateString('hi-IN', {
+                            day: 'numeric',
+                            month: 'short'
+                        });
+                        return `
+                            <div class="admin-post-item">
+                                <div class="admin-post-info">
+                                    <h3>${post.title}</h3>
+                                    <p>${post.category || 'General'} | पब्लिश तिथि: ${date}</p>
+                                </div>
+                                <button class="btn btn-danger" onclick="deletePost('${post.id}')">हटाएं 🗑️</button>
+                            </div>
+                        `;
+                    }).join('');
+                })
+                .catch(() => {
+                    document.getElementById('adminPostsList').innerHTML = 'लोड करने में असमर्थ।';
+                });
+        }
+
+        // Form Submit Handler (Create Post)
+        document.getElementById('postForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const category = document.getElementById('category').value;
+            const content = document.getElementById('content').value;
+
+            fetch('/api/posts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, category, content })
+            })
+            .then(res => {
+                if (res.status === 401) {
+                    alert('सेशन समाप्त हो गया। फिर से लॉगिन करें।');
+                    window.location.href = '/login';
+                    return;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.success) {
+                    alert('ब्लॉग सफलतापूर्वक पब्लिश हो गया!');
+                    document.getElementById('postForm').reset();
+                    loadAdminPosts();
+                } else {
+                    alert('एरर: ' + (data ? data.error : 'पब्लिश नहीं हो सका'));
+                }
+            })
+            .catch(() => {
+                alert('सर्वर एरर।');
+            });
+        });
+
+        // Delete Post Function
+        window.deletePost = function(id) {
+            if (confirm('क्या आप सच में इस ब्लॉग पोस्ट को हटाना चाहते हैं?')) {
+                fetch(`/api/posts/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(res => {
+                    if (res.status === 401) {
+                        alert('सेशन समाप्त हो गया। फिर से लॉगिन करें।');
+                        window.location.href = '/login';
+                        return;
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.success) {
+                        loadAdminPosts();
+                    } else {
+                        alert('हटाने में असफल।');
+                    }
+                })
+                .catch(() => {
+                    alert('सर्वर एरर।');
+                });
+            }
+        };
+
+        // Logout Button Handler
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            fetch('/api/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/login';
+                });
+        });
+
+        // Load initially
+        loadAdminPosts();
+    </script>
+</body>
+</html>
