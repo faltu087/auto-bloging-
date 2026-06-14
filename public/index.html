@@ -45,6 +45,7 @@
     <!-- Ghost Casper Style Giant Hero Banner -->
     <section class="ghost-hero" id="ghostHero">
         <div class="ghost-hero-content">
+            <span class="hero-label">✨ AI-Powered Publishing Portal</span>
             <h1 id="heroSiteTitle">Loading Title...</h1>
             <p id="heroSiteTagline">Loading Description...</p>
             
@@ -55,6 +56,57 @@
             </form>
             <div id="heroSubscribedMsg" style="display: none; font-size: 1.15rem; font-weight: 600; color: var(--success-color);">
                 🎉 Thank you! You've joined the newsletter.
+            </div>
+
+            <!-- Interactive Dashboard Mockup -->
+            <div class="dashboard-mockup">
+                <div class="mockup-header">
+                    <div class="mockup-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="mockup-title">Auto-Blogging Live Insights</div>
+                    <div class="mockup-status">Live</div>
+                </div>
+                <div class="mockup-body">
+                    <div class="mockup-sidebar">
+                        <div class="sidebar-item active">📈 Dashboard</div>
+                        <div class="sidebar-item">🤖 AI Writer</div>
+                        <div class="sidebar-item">👥 Members</div>
+                        <div class="sidebar-item">⚙️ Core Engine</div>
+                    </div>
+                    <div class="mockup-main">
+                        <div class="mockup-stats">
+                            <div class="mockup-stat-card">
+                                <span class="stat-label">Total Views</span>
+                                <span class="stat-value">12,480</span>
+                                <span class="stat-change positive">↑ 24.5%</span>
+                            </div>
+                            <div class="mockup-stat-card">
+                                <span class="stat-label">Subscribers</span>
+                                <span class="stat-value">1,250</span>
+                                <span class="stat-change positive">↑ 12.8%</span>
+                            </div>
+                            <div class="mockup-stat-card">
+                                <span class="stat-label">AI Posts</span>
+                                <span class="stat-value">342</span>
+                                <span class="stat-change">Active RSS</span>
+                            </div>
+                        </div>
+                        <div class="mockup-chart-container">
+                            <svg class="mockup-chart" viewBox="0 0 500 120" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+                                        <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path class="chart-line" d="M 0 110 Q 50 90 100 100 T 200 60 T 300 70 T 400 30 T 500 10" fill="none" stroke="#38bdf8" stroke-width="3" />
+                                <path class="chart-area" d="M 0 110 Q 50 90 100 100 T 200 60 T 300 70 T 400 30 T 500 10 L 500 120 L 0 120 Z" fill="url(#chart-grad)" />
+                                <circle cx="500" cy="10" r="5" fill="#38bdf8" class="chart-pulse" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -85,6 +137,51 @@
             <div class="posts-grid" id="postsGrid">
                 <!-- Posts will render here -->
             </div>
+
+            <!-- Platform Features Section -->
+            <section class="platform-features">
+                <div class="features-header">
+                    <span class="features-badge">🚀 Platform Features</span>
+                    <h2>Everything you need to run a modern publication</h2>
+                    <p>Built-in tools to automate content publishing, lock exclusive articles, and build subscriber lists at scale.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>AI Autopilot Writer</h3>
+                        <p>Automatically fetches feeds from configured RSS channels and drafts/publishes comprehensive articles using Gemini 2.5 Flash.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒 Members Paywall</div>
+                        <h3>Premium Newsletters</h3>
+                        <p>Lock premium articles behind an email-subscription wall. Drive user signup and build your custom subscriber audience easily.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡ Optimized Engine</div>
+                        <h3>Ultra-Fast Performance</h3>
+                        <p>Designed on top of light-weight Express with local storage, featuring seamless Light, Dark, and System theme synchronization.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📁 Flexible Database</div>
+                        <h3>Firebase & Local Storage</h3>
+                        <p>Runs offline using local JSON files and auto-switches to Cloud Google Firestore when a service account file is detected.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Integrations Bar -->
+            <section class="integrations-bar">
+                <p class="integrations-title">POWERED BY THE MODERN WEB TECH STACK</p>
+                <div class="logos-grid">
+                    <div class="logo-item">🟢 Node.js</div>
+                    <div class="logo-item">⚡ Express</div>
+                    <div class="logo-item">✨ Gemini AI</div>
+                    <div class="logo-item">🔥 Firebase</div>
+                    <div class="logo-item">📁 Local JSON</div>
+                    <div class="logo-item">📝 Quill Editor</div>
+                    <div class="logo-item">📰 RSS Feeds</div>
+                </div>
+            </section>
 
             <!-- Newsletter Box -->
             <div class="newsletter-box" id="bottomNewsletterBox">
@@ -326,15 +423,18 @@
             const toggleLink = document.getElementById(`toggle_${id}`);
             const commentBlock = document.getElementById(`comments_section_${id}`);
             const paywallBlock = document.getElementById(`paywall_${id}`);
+            const postCard = document.getElementById(`post_${id}`);
 
             const isSubscribed = localStorage.getItem('is_subscribed') === 'true';
             if (access === 'members' && !isSubscribed) {
                 if (paywallBlock.style.display === 'none') {
                     paywallBlock.style.display = 'block';
                     toggleLink.innerHTML = 'पढ़ना बंद करें';
+                    if (postCard) postCard.classList.add('post-card-expanded');
                 } else {
                     paywallBlock.style.display = 'none';
                     toggleLink.innerHTML = 'Unlock Post 🔒';
+                    if (postCard) postCard.classList.remove('post-card-expanded');
                 }
                 return;
             }
@@ -342,16 +442,18 @@
             if (content.style.display === 'none') {
                 content.style.display = 'block';
                 commentBlock.style.display = 'block';
-                excerpt.style.display = 'none';
+                if (excerpt) excerpt.style.display = 'none';
                 toggleLink.innerHTML = '← छोटी पोस्ट करें';
+                if (postCard) postCard.classList.add('post-card-expanded');
                 
                 recordView(id);
                 loadComments(id);
             } else {
                 content.style.display = 'none';
                 commentBlock.style.display = 'none';
-                excerpt.style.display = 'block';
+                if (excerpt) excerpt.style.display = 'block';
                 toggleLink.innerHTML = 'पूरी पोस्ट पढ़ें →';
+                if (postCard) postCard.classList.remove('post-card-expanded');
             }
         };
 
@@ -468,7 +570,7 @@
 
                     const author = window.siteSettings.authorName || 'Admin';
 
-                    postsGrid.innerHTML = posts.map(post => {
+                    postsGrid.innerHTML = posts.map((post, index) => {
                         const date = new Date(post.timestamp).toLocaleDateString('hi-IN', {
                             day: 'numeric',
                             month: 'short',
@@ -479,7 +581,7 @@
                         const wordCount = cleanContentText.split(/\s+/).length;
                         const readTime = Math.max(1, Math.ceil(wordCount / 200)); 
 
-                        const excerptLength = 220;
+                        const excerptLength = 180;
                         const hasExcerpt = cleanContentText.length > excerptLength;
                         const excerpt = hasExcerpt ? cleanContentText.substr(0, excerptLength) + '...' : cleanContentText;
                         
@@ -490,28 +592,101 @@
                         const accessBadge = isMembersOnly ? '<span class="badge-access">🔒 Members Only</span>' : '';
                         const readMoreLabel = isMembersOnly ? 'Unlock Post 🔒' : 'पूरी पोस्ट पढ़ें →';
 
-                        return `
-                            <article class="post-card" id="post_${post.id}">
+                        // Extract first image src if exists
+                        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+                        const match = imgRegex.exec(post.content);
+                        const firstImage = match ? match[1] : null;
+
+                        // Assign card styles dynamically based on index to create a Ghost.org-like gallery grid
+                        let cardClass = 'post-card-standard';
+                        let styleAttr = '';
+                        
+                        if (index === 0) {
+                            cardClass = 'post-card-featured';
+                        } else if (index % 4 === 1 && !firstImage) {
+                            cardClass = 'post-card-minimal';
+                            const gradients = [
+                                'linear-gradient(135deg, rgba(236,72,153,0.08) 0%, rgba(239,68,68,0.08) 100%)',
+                                'linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(16,185,129,0.08) 100%)',
+                                'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(236,72,153,0.08) 100%)',
+                                'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.08) 100%)'
+                            ];
+                            const grad = gradients[post.title.length % gradients.length];
+                            styleAttr = `style="background: ${grad};"`;
+                        } else if (index % 4 === 3 && firstImage) {
+                            cardClass = 'post-card-image';
+                            styleAttr = `style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.85)), url('${firstImage}');"`;
+                        }
+
+                        // Build card content depending on type
+                        let cardInner = '';
+                        if (cardClass === 'post-card-image') {
+                            cardInner = `
+                                <div class="post-card-img-content">
+                                    <div class="post-category">${post.category || 'General'}</div>
+                                    <h3 class="post-title">${post.title}</h3>
+                                    <div class="post-meta">
+                                        ${accessBadge}
+                                        <span>• ${date}</span>
+                                        <span>• ⏱️ ${readTime} min read</span>
+                                    </div>
+                                    <div class="post-excerpt">${excerpt}</div>
+                                    <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}', '${post.access}')">${readMoreLabel}</a>
+                                </div>
+                            `;
+                        } else if (cardClass === 'post-card-minimal') {
+                            cardInner = `
                                 <div class="post-category">${post.category || 'General'}</div>
-                                <h3 class="post-title">${post.title}</h3>
+                                <h3 class="post-title font-serif-heading">${post.title}</h3>
                                 <div class="post-meta">
                                     ${accessBadge}
-                                    <span>✍️ ${author}</span>
                                     <span>• ${date}</span>
-                                    <span>• ⏱️ ${readTime} min read</span>
-                                    <span>• 👁️ <span id="views_${post.id}">${post.views || 0} views</span></span>
                                 </div>
-                                
-                                <!-- Excerpt View -->
-                                <div class="post-excerpt" id="excerpt_${post.id}">
-                                    ${excerpt}
+                                <div class="post-excerpt italic-excerpt">"${excerpt}"</div>
+                                <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}', '${post.access}')">${readMoreLabel}</a>
+                            `;
+                        } else if (cardClass === 'post-card-featured') {
+                            cardInner = `
+                                ${firstImage ? `<div class="post-featured-image" style="background-image: url('${firstImage}')"></div>` : '<div class="post-featured-image-placeholder">✨ Featured Article</div>'}
+                                <div class="post-featured-info">
+                                    <div class="post-category">${post.category || 'General'}</div>
+                                    <h3 class="post-title">${post.title}</h3>
+                                    <div class="post-meta">
+                                        ${accessBadge}
+                                        <span>✍️ ${author}</span>
+                                        <span>• ${date}</span>
+                                        <span>• ⏱️ ${readTime} min read</span>
+                                        <span>• 👁️ <span id="views_${post.id}">${post.views || 0} views</span></span>
+                                    </div>
+                                    <div class="post-excerpt">${excerpt}</div>
+                                    <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}', '${post.access}')">${readMoreLabel}</a>
                                 </div>
+                            `;
+                        } else {
+                            cardInner = `
+                                ${firstImage ? `<div class="post-thumbnail" style="background-image: url('${firstImage}')"></div>` : ''}
+                                <div class="post-card-info">
+                                    <div class="post-category">${post.category || 'General'}</div>
+                                    <h3 class="post-title">${post.title}</h3>
+                                    <div class="post-meta">
+                                        ${accessBadge}
+                                        <span>✍️ ${author}</span>
+                                        <span>• ${date}</span>
+                                        <span>• ⏱️ ${readTime} min read</span>
+                                    </div>
+                                    <div class="post-excerpt">${excerpt}</div>
+                                    <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}', '${post.access}')">${readMoreLabel}</a>
+                                </div>
+                            `;
+                        }
+
+                        return `
+                            <article class="${cardClass}" id="post_${post.id}" ${styleAttr}>
+                                ${cardInner}
                                 
-                                <!-- Full Content View -->
                                 <div class="post-content" id="content_${post.id}" style="display: none;">
                                     ${post.content}
                                     
-                                    <!-- Social Share Bar -->
                                     <div class="share-bar">
                                         <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;">Share this:</span>
                                         <a href="https://wa.me/?text=${postText}%20${postUrl}" target="_blank" class="share-btn">🟢 WhatsApp</a>
@@ -520,7 +695,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Members Only Paywall Locker -->
                                 <div class="paywall-lock-box" id="paywall_${post.id}" style="display: none;">
                                     <div class="paywall-lock-icon">🔒</div>
                                     <h4>यह पोस्ट केवल न्यूज़लेटर सब्सक्राइबर्स के लिए है</h4>
@@ -531,7 +705,6 @@
                                     </form>
                                 </div>
                                 
-                                <!-- Comments Section -->
                                 <div class="comments-section" id="comments_section_${post.id}" style="display: none;">
                                     <h3>💬 टिप्पणियां (Comments)</h3>
                                     <div class="comments-list" id="comments_list_${post.id}"></div>
@@ -547,13 +720,6 @@
                                         <button type="submit" class="btn btn-secondary" style="font-size:0.8rem;">टिप्पणी पोस्ट करें</button>
                                     </form>
                                 </div>
-                                
-                                <!-- Read More -->
-                                ${hasExcerpt ? `
-                                    <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}', '${post.access}')">
-                                        ${readMoreLabel}
-                                    </a>
-                                ` : ''}
                             </article>
                         `;
                     }).join('');
