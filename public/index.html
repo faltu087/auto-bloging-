@@ -27,7 +27,7 @@
             </div>
         </header>
 
-        <!-- Static Pages Navigation Links (Mandatory Sections like Blogger/Wix) -->
+        <!-- Static Pages Navigation Links -->
         <nav class="static-nav">
             <span class="static-nav-link active" id="nav-home" onclick="showView('home')">होम (Home)</span>
             <span class="static-nav-link" id="nav-about" onclick="showView('about')">हमारे बारे में (About)</span>
@@ -39,7 +39,7 @@
         <!-- Main Blog Posts Section -->
         <main id="mainView">
             
-            <!-- Category Filter Bar (Like Medium/Hashnode) -->
+            <!-- Category Filter Bar -->
             <div class="category-filter-bar" id="categoryFilterBar">
                 <button class="cat-filter-btn active" onclick="filterCategory('All', this)">All</button>
                 <button class="cat-filter-btn" onclick="filterCategory('Technology', this)">Technology</button>
@@ -50,7 +50,7 @@
                 <button class="cat-filter-btn" onclick="filterCategory('General', this)">General</button>
             </div>
 
-            <!-- Search Container (Like Wix/WordPress search function) -->
+            <!-- Search Container -->
             <div class="search-container">
                 <div class="search-input-wrapper">
                     <input type="text" id="searchInput" class="search-input" placeholder="🔍 आर्टिकल्स खोजें (Search posts)..." oninput="handleSearch(this.value)">
@@ -61,7 +61,7 @@
                 <!-- Posts will render here -->
             </div>
 
-            <!-- Newsletter Box (Ghost/Substack feature) -->
+            <!-- Newsletter Box -->
             <div class="newsletter-box">
                 <h3>📧 साप्ताहिक न्यूज़लेटर (Newsletter)</h3>
                 <p>ताज़ा ब्लॉग और ट्रेंडिंग आर्टिकल्स सीधे अपने इनबॉक्स में प्राप्त करने के लिए सब्सक्राइब करें।</p>
@@ -128,6 +128,7 @@
         let selectedCategory = 'All';
         let searchQuery = '';
         let timer = null;
+        window.siteSettings = {}; // Global variable to hold settings
 
         // ----------------------------------------------------
         // Configuration / Dynamic Settings Loader
@@ -136,10 +137,14 @@
             fetch('/api/settings')
                 .then(res => res.json())
                 .then(data => {
+                    window.siteSettings = data;
                     document.getElementById('siteBrowserTitle').innerText = data.siteTitle;
                     document.getElementById('siteMainTitle').innerText = data.siteTitle;
                     document.getElementById('siteTagline').innerText = data.siteTagline;
                     document.getElementById('siteFooterTitle').innerText = data.siteTitle;
+                    
+                    // Reload posts to ensure author name displays
+                    loadPosts();
                 });
         }
         loadSettings();
@@ -231,7 +236,7 @@
         }
 
         // ----------------------------------------------------
-        // Views Count & Social Share
+        // Views Count & Inline Expand
         // ----------------------------------------------------
         function recordView(id) {
             fetch(`/api/posts/${id}/view`, { method: 'POST' })
@@ -248,17 +253,86 @@
             const excerpt = document.getElementById(`excerpt_${id}`);
             const content = document.getElementById(`content_${id}`);
             const toggleLink = document.getElementById(`toggle_${id}`);
+            const commentBlock = document.getElementById(`comments_section_${id}`);
             
             if (content.style.display === 'none') {
                 content.style.display = 'block';
+                commentBlock.style.display = 'block';
                 excerpt.style.display = 'none';
                 toggleLink.innerHTML = '← छोटी पोस्ट करें';
-                recordView(id); // Record view when fully read
+                
+                recordView(id); // Record view
+                loadComments(id); // Load comments dynamically
             } else {
                 content.style.display = 'none';
+                commentBlock.style.display = 'none';
                 excerpt.style.display = 'block';
                 toggleLink.innerHTML = 'पूरी पोस्ट पढ़ें →';
             }
+        };
+
+        // ----------------------------------------------------
+        // WordPress Comment Section Loop Logic
+        // ----------------------------------------------------
+        function loadComments(postId) {
+            const list = document.getElementById(`comments_list_${postId}`);
+            list.innerHTML = '<div style="font-size:0.85rem;color:var(--text-secondary);">Comments loading...</div>';
+
+            fetch(`/api/comments?postId=${postId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        list.innerHTML = '<div style="font-size:0.85rem;color:var(--text-secondary);font-style:italic;">कोई टिप्पणी नहीं है। पहली टिप्पणी लिखें!</div>';
+                        return;
+                    }
+
+                    list.innerHTML = data.map(c => {
+                        const date = new Date(c.timestamp).toLocaleDateString('hi-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        return `
+                            <div class="comment-item">
+                                <div class="comment-header">
+                                    <span class="comment-author">👤 ${c.authorName}</span>
+                                    <span>${date}</span>
+                                </div>
+                                <p class="comment-text">${c.commentText}</p>
+                            </div>
+                        `;
+                    }).join('');
+                })
+                .catch(() => {
+                    list.innerHTML = '<div style="color:var(--danger-color);">टिप्पणी लोड करने में विफल।</div>';
+                });
+        }
+
+        window.submitComment = function(e, postId) {
+            e.preventDefault();
+            const authorName = document.getElementById(`comment_author_${postId}`).value || 'Guest';
+            const commentText = document.getElementById(`comment_text_${postId}`).value;
+
+            fetch('/api/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, authorName, commentText })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`comment_form_${postId}`).reset();
+                    loadComments(postId); // Reload comment list
+                    
+                    // Increment total comments in any active state if needed
+                } else {
+                    alert('टिप्पणी पोस्ट करने में त्रुटि आई।');
+                }
+            })
+            .catch(() => {
+                alert('सर्वर एरर।');
+            });
         };
 
         // ----------------------------------------------------
@@ -300,6 +374,8 @@
                         return;
                     }
 
+                    const author = window.siteSettings.authorName || 'Admin';
+
                     postsGrid.innerHTML = posts.map(post => {
                         const date = new Date(post.timestamp).toLocaleDateString('hi-IN', {
                             day: 'numeric',
@@ -319,7 +395,7 @@
                             <article class="post-card" id="post_${post.id}">
                                 <div class="post-category">${post.category || 'General'}</div>
                                 <h3 class="post-title">${post.title}</h3>
-                                <div class="post-meta">प्रकाशित: ${date} | <span id="views_${post.id}">${post.views || 0} views</span></div>
+                                <div class="post-meta">लेखक: ✍️ ${author} | प्रकाशित: ${date} | 👁️ <span id="views_${post.id}">${post.views || 0} views</span></div>
                                 
                                 <!-- Excerpt View -->
                                 <div class="post-excerpt" id="excerpt_${post.id}">
@@ -330,13 +406,33 @@
                                 <div class="post-content" id="content_${post.id}" style="display: none;">
                                     ${post.content}
                                     
-                                    <!-- Social Share Bar (Blogger/Wix share features) -->
+                                    <!-- Social Share Bar -->
                                     <div class="share-bar">
                                         <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;">Share this:</span>
                                         <a href="https://wa.me/?text=${postText}%20${postUrl}" target="_blank" class="share-btn">🟢 WhatsApp</a>
                                         <a href="https://twitter.com/intent/tweet?url=${postUrl}&text=${postText}" target="_blank" class="share-btn">🔵 Twitter</a>
                                         <a href="https://www.facebook.com/sharer/sharer.php?u=${postUrl}" target="_blank" class="share-btn">🔷 Facebook</a>
                                     </div>
+                                </div>
+                                
+                                <!-- Comments Section (WordPress Style, Hidden initially) -->
+                                <div class="comments-section" id="comments_section_${post.id}" style="display: none;">
+                                    <h3>💬 टिप्पणियां (Comments)</h3>
+                                    
+                                    <!-- Comments list -->
+                                    <div class="comments-list" id="comments_list_${post.id}"></div>
+                                    
+                                    <!-- Add Comment Form -->
+                                    <div class="comment-form-title">एक टिप्पणी छोड़ें (Leave a Comment)</div>
+                                    <form id="comment_form_${post.id}" onsubmit="submitComment(event, '${post.id}')">
+                                        <div class="form-group" style="margin-bottom:12px;">
+                                            <input type="text" id="comment_author_${post.id}" class="form-control" placeholder="आपका नाम (वैकल्पिक)..." style="max-width:250px;">
+                                        </div>
+                                        <div class="form-group" style="margin-bottom:12px;">
+                                            <textarea id="comment_text_${post.id}" class="form-control" rows="3" placeholder="अपनी टिप्पणी यहाँ लिखें..." required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-secondary" style="font-size:0.8rem;">टिप्पणी पोस्ट करें</button>
+                                    </form>
                                 </div>
                                 
                                 <!-- Read More -->
@@ -354,7 +450,7 @@
                 });
         }
 
-        // Handle search input with debouncing
+        // Handle search input
         function handleSearch(val) {
             clearTimeout(timer);
             searchQuery = val;
@@ -373,9 +469,6 @@
 
             loadPosts();
         }
-
-        // Load posts initially
-        loadPosts();
     </script>
 </body>
 </html>

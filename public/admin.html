@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Auto-Blogging</title>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Quill WYSIWYG Editor Styles -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+    
+    <!-- Unified style.css -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-dark">
@@ -13,7 +19,7 @@
         <header>
             <div class="logo-group">
                 <h1 id="headerSiteTitle">Admin Dashboard ⚙️</h1>
-                <p>ऑटोमेटेड ब्लॉगिंग कंट्रोल सेंटर</p>
+                <p>वर्डप्रेस क्लोन कंट्रोल सेंटर (WordPress Clone Panel)</p>
             </div>
             <div class="nav-links">
                 <a href="/" class="btn btn-secondary">← मुख्य साइट देखें</a>
@@ -21,7 +27,27 @@
             </div>
         </header>
 
-        <!-- Admin Tab Navigation Options (WordPress/Ghost features) -->
+        <!-- "At a Glance" Stats Bar (WordPress Dashboard Widget style) -->
+        <section class="stats-grid">
+            <div class="stats-card">
+                <div class="stats-value" id="statPosts">0</div>
+                <div class="stats-label">कुल पोस्ट्स (Posts)</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-value" id="statViews">0</div>
+                <div class="stats-label">कुल व्यूज़ (Views)</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-value" id="statComments">0</div>
+                <div class="stats-label">कुल टिप्पणियां (Comments)</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-value" id="statSubs">0</div>
+                <div class="stats-label">सब्सक्राइबर्स (Subs)</div>
+            </div>
+        </section>
+
+        <!-- Admin Tab Navigation Options -->
         <nav class="admin-tabs">
             <button class="admin-tab-btn active" id="tab-posts" onclick="switchTab('posts')">📋 लेख सूची (Posts List)</button>
             <button class="admin-tab-btn" id="tab-write" onclick="switchTab('write')">📝 नया लेख (Write Blog)</button>
@@ -39,45 +65,75 @@
             </div>
         </div>
 
-        <!-- TAB CONTENT 2: WRITE POST -->
+        <!-- TAB CONTENT 2: WRITE POST (INCLUDES QUILL & MEDIA UPLOADER) -->
         <div class="admin-tab-content" id="content-write">
-            <div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px;">
-                <h2 style="margin: 0 0 24px 0; font-size: 1.3rem;">📝 नया ब्लॉग आर्टिकल लिखें</h2>
-                <form id="postForm">
-                    <div class="form-group">
-                        <label for="title">शीर्षक (Blog Title)</label>
-                        <input type="text" id="title" class="form-control" placeholder="आर्टिकल का नाम लिखें..." required>
-                    </div>
-                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <label for="category">श्रेणी (Category)</label>
-                            <select id="category" class="form-control">
-                                <option value="Technology">Technology</option>
-                                <option value="Sports">Sports</option>
-                                <option value="Health">Health</option>
-                                <option value="Business">Business</option>
-                                <option value="Science">Science</option>
-                                <option value="General" selected>General</option>
-                            </select>
+            <div class="admin-split-layout">
+                <!-- Write Post Editor Panel -->
+                <div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px;">
+                    <h2 style="margin: 0 0 24px 0; font-size: 1.3rem;">📝 नया ब्लॉग आर्टिकल लिखें</h2>
+                    <form id="postForm">
+                        <div class="form-group">
+                            <label for="title">शीर्षक (Blog Title)</label>
+                            <input type="text" id="title" class="form-control" placeholder="आर्टिकल का नाम लिखें..." required>
                         </div>
-                        <div>
-                            <label for="status">स्थिति (Status)</label>
-                            <select id="status" class="form-control">
-                                <option value="published" selected>पब्लिश (Published)</option>
-                                <option value="draft">ड्राफ्ट (Draft)</option>
-                            </select>
+                        
+                        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label for="category">श्रेणी (Category)</label>
+                                <select id="category" class="form-control">
+                                    <option value="Technology">Technology</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Health">Health</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Science">Science</option>
+                                    <option value="General" selected>General</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status">स्थिति (Status)</label>
+                                <select id="status" class="form-control">
+                                    <option value="published" selected>पब्लिश (Published)</option>
+                                    <option value="draft">ड्राफ्ट (Draft)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="seoDescription">SEO डिस्क्रिप्शन (Meta Summary)</label>
+                            <input type="text" id="seoDescription" class="form-control" placeholder="खोज इंजनों के लिए 1-लाइन सारांश...">
+                        </div>
+
+                        <!-- WYSIWYG Rich Text Editor (WordPress block/classic editor feel) -->
+                        <div class="form-group">
+                            <label>कंटेंट (Blog Content)</label>
+                            <div id="editor-container"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">पब्लिश करें 🚀</button>
+                    </form>
+                </div>
+
+                <!-- WordPress style Media Uploader Sidebar -->
+                <div>
+                    <h2 style="margin: 0 0 20px 0; font-size: 1.3rem;">📷 मीडिया लाइब्रेरी (Upload Images)</h2>
+                    <div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px;">
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 15px 0;">ब्लॉग में इमेज लगाने के लिए यहाँ से इमेज अपलोड करें और उसका लिंक कॉपी करके एडिटर में जोड़ें।</p>
+                        
+                        <form id="mediaUploadForm" enctype="multipart/form-data">
+                            <div class="media-uploader-box">
+                                <span style="font-size:1.5rem; display:block; margin-bottom: 8px;">📤</span>
+                                <input type="file" id="mediaFile" name="image" accept="image/*" style="display: none;" onchange="handleMediaUpload(this)">
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('mediaFile').click()">इमेज चुनें</button>
+                            </div>
+                        </form>
+
+                        <div id="mediaUploadResult" style="display: none;">
+                            <span style="font-size:0.8rem; font-weight:600; color:var(--success-color);">सफलतापूर्वक अपलोड किया गया!</span>
+                            <div class="media-url-display" id="uploadedUrlDisplay"></div>
+                            <button class="btn btn-secondary" style="width:100%; margin-top:10px; font-size:0.8rem;" onclick="copyUploadedUrl()">लिंक कॉपी करें</button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="seoDescription">SEO डिस्क्रिप्शन (Meta Description) - *खोज रैंकिंग के लिए*</label>
-                        <input type="text" id="seoDescription" class="form-control" placeholder="ब्लॉग के बारे में छोटा 1-line सारांश लिखें...">
-                    </div>
-                    <div class="form-group">
-                        <label for="content">कंटेंट (Blog Content)</label>
-                        <textarea id="content" class="form-control" rows="8" placeholder="ब्लॉग पोस्ट लिखना शुरू करें..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">पब्लिश करें 🚀</button>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -96,9 +152,15 @@
             <div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px;">
                 <h2 style="margin: 0 0 24px 0; font-size: 1.3rem;">⚙️ वेबसाइट कॉन्फ़िगरेशन</h2>
                 <form id="settingsForm">
-                    <div class="form-group">
-                        <label for="siteTitle">वेबसाइट का शीर्षक (Site Title)</label>
-                        <input type="text" id="siteTitle" class="form-control" required>
+                    <div class="form-group" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;">
+                        <div>
+                            <label for="siteTitle">वेबसाइट का शीर्षक (Site Title)</label>
+                            <input type="text" id="siteTitle" class="form-control" required>
+                        </div>
+                        <div>
+                            <label for="authorName">लेखक का नाम (Author Profile Display Name)</label>
+                            <input type="text" id="authorName" class="form-control" required>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="siteTagline">टैगलाइन (Site Tagline)</label>
@@ -118,20 +180,28 @@
         </div>
     </div>
 
+    <!-- Quill.js WYSIWYG Editor Script -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
     <script>
-        // Apply saved theme
-        const theme = localStorage.getItem('blog_theme') || 'dark';
-        if (theme === 'system') {
-            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.body.classList.remove('theme-light', 'theme-dark');
-            document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
-        } else {
-            document.body.classList.remove('theme-light', 'theme-dark');
-            document.body.classList.add(`theme-${theme}`);
-        }
+        // ----------------------------------------------------
+        // Initialize Quill Editor
+        // ----------------------------------------------------
+        const quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'clean']
+                ]
+            }
+        });
 
         // ----------------------------------------------------
-        // Tab Switcher Controller
+        // Tab Switcher Controller & Stats Loader
         // ----------------------------------------------------
         function switchTab(tabId) {
             const tabs = ['posts', 'write', 'subs', 'settings'];
@@ -142,19 +212,34 @@
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.getElementById(`content-${tabId}`).classList.add('active');
 
+            loadStats(); // Reload stats on every tab change
+
             if (tabId === 'posts') loadAdminPosts();
             if (tabId === 'subs') loadSubscribers();
             if (tabId === 'settings') loadSettingsForm();
         }
 
+        // Aggregate statistics from backend (At a Glance dashboard widgets)
+        function loadStats() {
+            fetch('/api/stats')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('statPosts').innerText = data.totalPosts || 0;
+                    document.getElementById('statViews').innerText = data.totalViews || 0;
+                    document.getElementById('statComments').innerText = data.totalComments || 0;
+                    document.getElementById('statSubs').innerText = data.totalSubscribers || 0;
+                });
+        }
+
         // ----------------------------------------------------
-        // Settings Loader & Saver (Wix/Blogger setup panel)
+        // Settings Loader & Saver
         // ----------------------------------------------------
         function loadSettingsForm() {
             fetch('/api/settings')
                 .then(res => res.json())
                 .then(data => {
                     document.getElementById('siteTitle').value = data.siteTitle || '';
+                    document.getElementById('authorName').value = data.authorName || '';
                     document.getElementById('siteTagline').value = data.siteTagline || '';
                     document.getElementById('siteDescription').value = data.siteDescription || '';
                 });
@@ -163,11 +248,12 @@
         document.getElementById('settingsForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const siteTitle = document.getElementById('siteTitle').value;
+            const authorName = document.getElementById('authorName').value;
             const siteTagline = document.getElementById('siteTagline').value;
             const siteDescription = document.getElementById('siteDescription').value;
             const adminPassword = document.getElementById('adminPassword').value;
 
-            const payload = { siteTitle, siteTagline, siteDescription };
+            const payload = { siteTitle, authorName, siteTagline, siteDescription };
             if (adminPassword.trim() !== '') {
                 payload.adminPassword = adminPassword;
             }
@@ -183,6 +269,7 @@
                     alert('सेटिंग्स सफलतापूर्वक सहेजी गईं!');
                     document.getElementById('adminPassword').value = '';
                     document.getElementById('headerSiteTitle').innerText = data.settings.siteTitle + ' ⚙️';
+                    loadStats();
                 } else {
                     alert('त्रुटि: सेटिंग्स सहेजने में विफल।');
                 }
@@ -193,7 +280,45 @@
         });
 
         // ----------------------------------------------------
-        // Newsletter Subscribers (Ghost style management)
+        // Media Library Uploader (Multer Integration)
+        // ----------------------------------------------------
+        function handleMediaUpload(input) {
+            if (!input.files || input.files.length === 0) return;
+            
+            const formData = new FormData();
+            formData.append('image', input.files[0]);
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const resultBox = document.getElementById('mediaUploadResult');
+                    const urlBox = document.getElementById('uploadedUrlDisplay');
+                    
+                    const fullUrl = window.location.origin + data.url;
+                    urlBox.innerText = fullUrl;
+                    resultBox.style.display = 'block';
+                } else {
+                    alert('इमेज अपलोड असफल: ' + data.error);
+                }
+            })
+            .catch(() => {
+                alert('इमेज अपलोड के दौरान सर्वर त्रुटि हुई।');
+            });
+        }
+
+        function copyUploadedUrl() {
+            const urlText = document.getElementById('uploadedUrlDisplay').innerText;
+            navigator.clipboard.writeText(urlText)
+                .then(() => alert('इमेज का URL सफलतापूर्वक कॉपी किया गया! इसे एडिटर में इमेज लिंक के रूप में जोड़ें।'))
+                .catch(() => alert('कॉपी करने में असमर्थ।'));
+        }
+
+        // ----------------------------------------------------
+        // Newsletter Subscribers
         // ----------------------------------------------------
         function loadSubscribers() {
             const list = document.getElementById('subscribersList');
@@ -234,8 +359,10 @@
                 fetch(`/api/subscribers/${id}`, { method: 'DELETE' })
                     .then(res => res.json())
                     .then(data => {
-                        if (data.success) loadSubscribers();
-                        else alert('हटाने में असफल।');
+                        if (data.success) {
+                            loadSubscribers();
+                            loadStats();
+                        } else alert('हटाने में असफल।');
                     });
             }
         };
@@ -284,14 +411,16 @@
                 });
         }
 
-        // Form Submit (Write Blog)
+        // Form Submit (Write Blog using Quill HTML)
         document.getElementById('postForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const title = document.getElementById('title').value;
             const category = document.getElementById('category').value;
             const status = document.getElementById('status').value;
             const seoDescription = document.getElementById('seoDescription').value;
-            const content = document.getElementById('content').value;
+            
+            // Get content as HTML from Quill editor (WordPress rich text format)
+            const content = quill.getSemanticHTML(); 
 
             fetch('/api/posts', {
                 method: 'POST',
@@ -310,7 +439,8 @@
                 if (data && data.success) {
                     alert('ब्लॉग सफलतापूर्वक सहेजा गया!');
                     document.getElementById('postForm').reset();
-                    switchTab('posts'); // switch back to posts list
+                    quill.setText(''); // Clear Quill editor
+                    switchTab('posts');
                 } else {
                     alert('एरर: ' + (data ? data.error : 'सहेजने में विफल'));
                 }
@@ -334,6 +464,7 @@
                 .then(data => {
                     if (data && data.success) {
                         loadAdminPosts();
+                        loadStats();
                     } else {
                         alert('हटाने में असफल।');
                     }
@@ -352,15 +483,16 @@
                 });
         });
 
-        // Initialize header title dynamically
+        // Initialize header title and load stats initially
         fetch('/api/settings')
             .then(res => res.json())
             .then(data => {
                 document.getElementById('headerSiteTitle').innerText = data.siteTitle + ' ⚙️';
             });
 
-        // Load initially
+        // Initial Load
         loadAdminPosts();
+        loadStats();
     </script>
 </body>
 </html>

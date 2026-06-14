@@ -18,6 +18,7 @@ body.theme-light {
     --danger-color: #c92a2a;
     --card-hover: #f9f9f9;
     --neutral-badge: #f2f2f2;
+    --dashboard-card: #f8fafc;
 }
 
 /* Dark Theme (Hashnode style) */
@@ -33,6 +34,7 @@ body.theme-dark {
     --danger-color: #ef4444;
     --card-hover: #1e293b;
     --neutral-badge: #1e293b;
+    --dashboard-card: #111827;
 }
 
 /* Global Reset & Typography */
@@ -50,7 +52,7 @@ body {
 }
 
 .container {
-    max-width: 740px; /* Optimal reading column width */
+    max-width: 800px; /* Optimal reading column width + comment sections */
     width: 100%;
     margin: 0 auto;
     padding: 40px 24px;
@@ -334,6 +336,15 @@ header {
     margin-bottom: 24px;
 }
 
+/* Rendered images inside post content */
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+    border: 1px solid var(--border-color);
+}
+
 /* Excerpt style */
 .post-excerpt {
     font-family: var(--font-serif);
@@ -387,6 +398,61 @@ header {
     color: var(--text-primary);
     border-color: var(--text-primary);
     background: var(--card-hover);
+}
+
+/* ----------------------------------------------------
+   Comments Section Layout (WordPress Style)
+   ---------------------------------------------------- */
+.comments-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-color);
+}
+
+.comments-section h3 {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    margin-bottom: 20px;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 35px;
+}
+
+.comment-item {
+    background: var(--card-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.comment-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.comment-form-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
 }
 
 /* Static Pages Block (About, Contact, etc.) */
@@ -485,7 +551,109 @@ header {
     border-color: var(--text-primary);
 }
 
-/* Admin Panel Tabs */
+/* ----------------------------------------------------
+   Admin Panel Layout & Dashboard Stats (WordPress Style)
+   ---------------------------------------------------- */
+.admin-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+}
+
+/* At a Glance Stats Widgets */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.stats-card {
+    background: var(--dashboard-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stats-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.stats-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+/* Two column layout inside active admin tabs */
+.admin-split-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+}
+
+/* Media Uploader box styles */
+.media-uploader-box {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+    transition: border-color 0.15s;
+}
+
+.media-uploader-box:hover {
+    border-color: var(--text-primary);
+}
+
+.media-url-display {
+    margin-top: 15px;
+    padding: 10px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    word-break: break-all;
+    text-align: left;
+}
+
+/* Quill Editor custom styling to override white background */
+.ql-toolbar {
+    background: var(--dashboard-card) !important;
+    border-color: var(--border-color) !important;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+.ql-container {
+    background: var(--input-bg) !important;
+    border-color: var(--border-color) !important;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    font-family: var(--font-serif) !important;
+    font-size: 1.05rem !important;
+    min-height: 250px;
+}
+.ql-editor {
+    color: var(--text-primary) !important;
+}
+.ql-stroke {
+    stroke: var(--text-primary) !important;
+}
+.ql-fill {
+    fill: var(--text-primary) !important;
+}
+.ql-picker {
+    color: var(--text-primary) !important;
+}
+
 .admin-tabs {
     display: flex;
     gap: 15px;
@@ -578,6 +746,12 @@ footer {
 
 /* Responsive UI */
 @media (max-width: 768px) {
+    .admin-split-layout {
+        grid-template-columns: 1fr;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
     .newsletter-form {
         flex-direction: column;
         gap: 8px;

@@ -1,6 +1,8 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const db = require('./db');
 require('dotenv').config();
 
@@ -11,6 +13,25 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Setup Public Uploads Directory (WordPress Media Library feature)
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Multer Storage Configuration for Image Uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname);
+        cb(null, 'media-' + uniqueSuffix + ext);
+    }
+});
+const upload = multer({ storage: storage });
 
 // Custom helper to get current admin password
 async function getAdminPassword() {
@@ -54,7 +75,6 @@ app.post('/api/login', async (req, res) => {
     const { password } = req.body;
     const adminPassword = await getAdminPassword();
     if (password === adminPassword) {
-        // Set cookie valid for 7 days
         res.cookie('admin_auth', adminPassword, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
         res.json({ success: true, message: 'Logged in successfully!' });
     } else {
@@ -73,11 +93,10 @@ app.get('/api/db-info', (req, res) => {
     res.json({ dbType: db.getDbType() });
 });
 
-// 6. API - Settings Routes
+// 6. API - Settings Routes (Includes authorName)
 app.get('/api/settings', async (req, res) => {
     try {
         const settings = await db.getSettings();
-        // Hide password when sending to public
         const publicSettings = { ...settings };
         delete publicSettings.adminPassword;
         res.json(publicSettings);
@@ -87,17 +106,17 @@ app.get('/api/settings', async (req, res) => {
 });
 
 app.post('/api/settings', requireAdmin, async (req, res) => {
-    const { siteTitle, siteTagline, siteDescription, adminPassword } = req.body;
+    const { siteTitle, siteTagline, siteDescription, adminPassword, authorName } = req.body;
     try {
         const updatedData = {};
         if (siteTitle !== undefined) updatedData.siteTitle = siteTitle;
         if (siteTagline !== undefined) updatedData.siteTagline = siteTagline;
         if (siteDescription !== undefined) updatedData.siteDescription = siteDescription;
+        if (authorName !== undefined) updatedData.authorName = authorName;
         if (adminPassword !== undefined && adminPassword.trim() !== "") updatedData.adminPassword = adminPassword;
 
         const updated = await db.saveSettings(updatedData);
         
-        // If password changed, update session cookie
         if (updatedData.adminPassword) {
             res.cookie('admin_auth', updatedData.adminPassword, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
         }
@@ -144,11 +163,9 @@ app.delete('/api/subscribers/:id', requireAdmin, async (req, res) => {
     }
 });
 
-// 8. API - Get Blog Posts (Public / Admin Filtered)
+// 8. API - Get Blog Posts
 app.get('/api/posts', async (req, res) => {
     const { category, search } = req.query;
-    
-    // Check if the requester is authenticated as admin
     const adminPassword = await getAdminPassword();
     const adminMode = req.cookies.admin_auth === adminPassword;
 
@@ -160,7 +177,7 @@ app.get('/api/posts', async (req, res) => {
     }
 });
 
-// 9. API - Add Blog Post (Protected)
+// 9. API - Add Blog Post
 app.post('/api/posts', requireAdmin, async (req, res) => {
     const { title, content, category, status, seoDescription } = req.body;
     if (!title || !content) {
@@ -174,7 +191,7 @@ app.post('/api/posts', requireAdmin, async (req, res) => {
     }
 });
 
-// 10. API - Increment Views (Public)
+// 10. API - Increment Views
 app.post('/api/posts/:id/view', async (req, res) => {
     const { id } = req.params;
     try {
@@ -185,7 +202,7 @@ app.post('/api/posts/:id/view', async (req, res) => {
     }
 });
 
-// 11. API - Delete Blog Post (Protected)
+// 11. API - Delete Blog Post
 app.delete('/api/posts/:id', requireAdmin, async (req, res) => {
     const { id } = req.params;
     try {
@@ -200,6 +217,50 @@ app.delete('/api/posts/:id', requireAdmin, async (req, res) => {
     }
 });
 
+// 12. API - Comments Routes (WordPress comments loop)
+app.get('/api/comments', async (req, res) => {
+    const { postId } = req.query;
+    if (!postId) return res.status(400).json({ error: 'postId query parameter is required.' });
+    try {
+        const comments = await db.getComments(postId);
+        res.json(comments);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to retrieve comments.' });
+    }
+});
+
+app.post('/api/comments', async (req, res) => {
+    const { postId, authorName, commentText } = req.body;
+    if (!postId || !commentText) {
+        return res.status(400).json({ error: 'postId and commentText are required.' });
+    }
+    try {
+        const newComment = await db.addComment(postId, { authorName, commentText });
+        res.json({ success: true, comment: newComment });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to save comment.' });
+    }
+});
+
+// 13. API - Media Upload (WordPress Media Library backend)
+app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'Please upload an image file.' });
+    }
+    const fileUrl = '/uploads/' + req.file.filename;
+    res.json({ success: true, url: fileUrl });
+});
+
+// 14. API - Dashboard Stats (WordPress "At a Glance" status)
+app.get('/api/stats', requireAdmin, async (req, res) => {
+    try {
+        const stats = await db.getDashboardStats();
+        res.json(stats);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to retrieve dashboard stats.' });
+    }
+});
+
 // Serve public static assets
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -211,7 +272,7 @@ app.get('*', (req, res) => {
 // Start Server
 app.listen(PORT, () => {
     console.log('='*60);
-    console.log(`[SERVER] Auto-Blogging Website is running!`);
+    console.log(`[SERVER] Auto-Blogging WordPress Clone is running!`);
     console.log(`[SERVER] URL: http://localhost:${PORT}`);
     console.log(`[SERVER] Admin Panel: http://localhost:${PORT}/admin`);
     console.log('='*60);

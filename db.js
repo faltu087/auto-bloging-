@@ -7,6 +7,7 @@ let db = null;
 const jsonFilePath = path.join(__dirname, 'posts.json');
 const settingsFilePath = path.join(__dirname, 'settings.json');
 const subsFilePath = path.join(__dirname, 'subscribers.json');
+const commentsFilePath = path.join(__dirname, 'comments.json');
 
 // Initialize local JSON files if they don't exist
 if (!fs.existsSync(jsonFilePath)) {
@@ -18,12 +19,16 @@ if (!fs.existsSync(settingsFilePath)) {
         siteTagline: "ऑटोमेटेड ब्लॉगिंग और कंटेंट हब",
         siteDescription: "प्रीमियम और प्रोफेशनल ऑटो-ब्लॉगिंग वेबसाइट",
         adminPassword: process.env.ADMIN_PASSWORD || "9696",
+        authorName: "Admin",
         postsPerPage: 10
     };
     fs.writeFileSync(settingsFilePath, JSON.stringify(defaultSettings, null, 2));
 }
 if (!fs.existsSync(subsFilePath)) {
     fs.writeFileSync(subsFilePath, JSON.stringify([], null, 2));
+}
+if (!fs.existsSync(commentsFilePath)) {
+    fs.writeFileSync(commentsFilePath, JSON.stringify([], null, 2));
 }
 
 // Attempt Firebase Admin initialization
@@ -35,7 +40,6 @@ if (fs.existsSync(serviceAccountPath)) {
         const admin = require('firebase-admin');
         const serviceAccount = require(serviceAccountPath);
         
-        // Prevent double initialization if nodemon restarts
         if (admin.apps.length === 0) {
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),
@@ -81,7 +85,6 @@ const dbApi = {
             try {
                 let query = db.collection('posts');
                 
-                // If not admin, force published only
                 if (!adminMode) {
                     query = query.where('status', '==', 'published');
                 } else if (status) {
@@ -98,7 +101,6 @@ const dbApi = {
                     posts.push({ id: doc.id, ...doc.data() });
                 });
 
-                // In-memory search fallback for Firestore (simple title/content match)
                 if (search) {
                     const searchLower = search.toLowerCase();
                     posts = posts.filter(post => 
@@ -115,19 +117,16 @@ const dbApi = {
         } else {
             let posts = readJsonFile(jsonFilePath);
 
-            // Filter status
             if (!adminMode) {
                 posts = posts.filter(post => post.status === 'published');
             } else if (status) {
                 posts = posts.filter(post => post.status === status);
             }
 
-            // Filter category
             if (category && category !== 'All') {
                 posts = posts.filter(post => post.category === category);
             }
 
-            // Filter search
             if (search) {
                 const searchLower = search.toLowerCase();
                 posts = posts.filter(post => 
@@ -136,7 +135,6 @@ const dbApi = {
                 );
             }
 
-            // Sort by timestamp desc
             return posts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
     },
@@ -146,7 +144,7 @@ const dbApi = {
             title: postData.title,
             content: postData.content,
             category: postData.category || 'General',
-            status: postData.status || 'published', // 'published' or 'draft'
+            status: postData.status || 'published',
             seoDescription: postData.seoDescription || '',
             views: 0,
             timestamp: postData.timestamp || new Date().toISOString()
@@ -173,6 +171,11 @@ const dbApi = {
         if (dbType === 'firebase') {
             try {
                 await db.collection('posts').doc(id).delete();
+                // Also clean up associated comments on Firestore
+                const comments = await db.collection('comments').where('postId', '==', id).get();
+                const batch = db.batch();
+                comments.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
                 return true;
             } catch (err) {
                 console.error('[DATABASE] Firestore delete error:', err.message);
@@ -183,6 +186,12 @@ const dbApi = {
             const originalLength = posts.length;
             posts = posts.filter(post => post.id !== id);
             writeJsonFile(jsonFilePath, posts);
+            
+            // Clean up comments in JSON
+            let comments = readJsonFile(commentsFilePath);
+            comments = comments.filter(c => c.postId !== id);
+            writeJsonFile(commentsFilePath, comments);
+
             return posts.length < originalLength;
         }
     },
@@ -215,6 +224,58 @@ const dbApi = {
     },
 
     // ----------------------------------------------------
+    // COMMENTS API (WordPress style comment loop)
+    // ----------------------------------------------------
+    getComments: async (postId) => {
+        if (dbType === 'firebase') {
+            try {
+                const snapshot = await db.collection('comments')
+                    .where('postId', '==', postId)
+                    .orderBy('timestamp', 'asc')
+                    .get();
+                const comments = [];
+                snapshot.forEach(doc => {
+                    comments.push({ id: doc.id, ...doc.data() });
+                });
+                return comments;
+            } catch (err) {
+                console.error('[DATABASE] Firestore comments error:', err.message);
+                return [];
+            }
+        } else {
+            const comments = readJsonFile(commentsFilePath);
+            return comments
+                .filter(c => c.postId === postId)
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        }
+    },
+
+    addComment: async (postId, commentData) => {
+        const comment = {
+            postId: postId,
+            authorName: commentData.authorName || 'Guest',
+            commentText: commentData.commentText,
+            timestamp: new Date().toISOString()
+        };
+
+        if (dbType === 'firebase') {
+            try {
+                const docRef = await db.collection('comments').add(comment);
+                return { id: docRef.id, ...comment };
+            } catch (err) {
+                console.error('[DATABASE] Firestore add comment failed:', err.message);
+                throw err;
+            }
+        } else {
+            const comments = readJsonFile(commentsFilePath);
+            comment.id = 'comm_' + Math.random().toString(36).substr(2, 9);
+            comments.push(comment);
+            writeJsonFile(commentsFilePath, comments);
+            return comment;
+        }
+    },
+
+    // ----------------------------------------------------
     // SUBSCRIBERS API
     // ----------------------------------------------------
     getSubscribers: async () => {
@@ -243,7 +304,6 @@ const dbApi = {
 
         if (dbType === 'firebase') {
             try {
-                // Check if already subscribed
                 const existing = await db.collection('subscribers').where('email', '==', email).get();
                 if (!existing.empty) return { alreadyExists: true };
 
@@ -292,12 +352,12 @@ const dbApi = {
                 if (doc.exists) {
                     return doc.data();
                 } else {
-                    // Default fallback inside Firestore
                     const defaultSettings = {
                         siteTitle: "Auto-Blogging Portal",
                         siteTagline: "ऑटोमेटेड ब्लॉगिंग और कंटेंट हब",
                         siteDescription: "प्रीमियम और प्रोफेशनल ऑटो-ब्लॉगिंग वेबसाइट",
                         adminPassword: process.env.ADMIN_PASSWORD || "9696",
+                        authorName: "Admin",
                         postsPerPage: 10
                     };
                     await db.collection('settings').doc('config').set(defaultSettings);
@@ -327,6 +387,48 @@ const dbApi = {
             writeJsonFile(settingsFilePath, updated);
             return updated;
         }
+    },
+
+    // ----------------------------------------------------
+    // DASHBOARD STATS API (WordPress "At a Glance" style)
+    // ----------------------------------------------------
+    getDashboardStats: async () => {
+        let totalPosts = 0;
+        let totalViews = 0;
+        let totalSubscribers = 0;
+        let totalComments = 0;
+
+        if (dbType === 'firebase') {
+            try {
+                const postsSnap = await db.collection('posts').get();
+                totalPosts = postsSnap.size;
+                postsSnap.forEach(doc => {
+                    totalViews += (doc.data().views || 0);
+                });
+
+                const subsSnap = await db.collection('subscribers').get();
+                totalSubscribers = subsSnap.size;
+
+                const commSnap = await db.collection('comments').get();
+                totalComments = commSnap.size;
+            } catch (err) {
+                console.error('[DATABASE] Failed to aggregate Firestore stats:', err.message);
+            }
+        } else {
+            const posts = readJsonFile(jsonFilePath);
+            totalPosts = posts.length;
+            posts.forEach(p => {
+                totalViews += (p.views || 0);
+            });
+
+            const subs = readJsonFile(subsFilePath);
+            totalSubscribers = subs.length;
+
+            const comments = readJsonFile(commentsFilePath);
+            totalComments = comments.length;
+        }
+
+        return { totalPosts, totalViews, totalSubscribers, totalComments };
     }
 };
 
