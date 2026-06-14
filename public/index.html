@@ -18,7 +18,7 @@
             <div class="nav-links">
                 <span class="db-badge" id="dbTypeBadge">Connecting...</span>
                 
-                <!-- Professional Theme Switcher Selector -->
+                <!-- Theme Switcher Selector -->
                 <select class="theme-selector" id="themeSelector" onchange="changeTheme(this.value)">
                     <option value="light">☀️ Light Theme</option>
                     <option value="dark" selected>🌙 Dark Theme</option>
@@ -29,7 +29,7 @@
 
         <!-- Main Blog Posts Section -->
         <main>
-            <h2 style="font-size: 1.35rem; margin-bottom: 25px; font-weight: 600;">ताज़ा ब्लॉग आर्टिकल्स (Latest Articles)</h2>
+            <h2 style="font-size: 1.2rem; margin-bottom: 30px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary);">ताज़ा ब्लॉग आर्टिकल्स (Latest Articles)</h2>
             <div class="posts-grid" id="postsGrid">
                 <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">
                     Loading articles...
@@ -87,6 +87,25 @@
         });
 
         // ----------------------------------------------------
+        // Toggle Post Full Content Inline
+        // ----------------------------------------------------
+        window.togglePost = function(id) {
+            const excerpt = document.getElementById(`excerpt_${id}`);
+            const content = document.getElementById(`content_${id}`);
+            const toggleLink = document.getElementById(`toggle_${id}`);
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                excerpt.style.display = 'none';
+                toggleLink.innerHTML = '← छोटी पोस्ट करें';
+            } else {
+                content.style.display = 'none';
+                excerpt.style.display = 'block';
+                toggleLink.innerHTML = 'पूरी पोस्ट पढ़ें →';
+            }
+        };
+
+        // ----------------------------------------------------
         // Data Fetching Scripts
         // ----------------------------------------------------
         // Fetch Database Type
@@ -128,12 +147,34 @@
                         year: 'numeric'
                     });
                     
+                    // Generate excerpt
+                    const excerptLength = 220;
+                    const cleanText = post.content.replace(/<[^>]*>/g, ''); // strip HTML if any
+                    const hasExcerpt = cleanText.length > excerptLength;
+                    const excerpt = hasExcerpt ? cleanText.substr(0, excerptLength) + '...' : cleanText;
+                    
                     return `
-                        <article class="post-card">
+                        <article class="post-card" id="post_${post.id}">
                             <div class="post-category">${post.category || 'General'}</div>
                             <h3 class="post-title">${post.title}</h3>
                             <div class="post-meta">प्रकाशित: ${date}</div>
-                            <div class="post-content">${post.content}</div>
+                            
+                            <!-- Excerpt View -->
+                            <div class="post-excerpt" id="excerpt_${post.id}">
+                                ${excerpt}
+                            </div>
+                            
+                            <!-- Full Content View (Hidden initially) -->
+                            <div class="post-content" id="content_${post.id}" style="display: none;">
+                                ${post.content}
+                            </div>
+                            
+                            <!-- Read More Link -->
+                            ${hasExcerpt ? `
+                                <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}')">
+                                    पूरी पोस्ट पढ़ें →
+                                </a>
+                            ` : ''}
                         </article>
                     `;
                 }).join('');
