@@ -33,11 +33,11 @@
     <nav class="navigation-bar">
         <div class="nav-inner">
             <div class="static-nav">
-                <span class="static-nav-link active" id="nav-home" onclick="showView('home')">होम (Home)</span>
-                <span class="static-nav-link" id="nav-about" onclick="showView('about')">हमारे बारे में (About)</span>
-                <span class="static-nav-link" id="nav-contact" onclick="showView('contact')">संपर्क करें (Contact)</span>
-                <span class="static-nav-link" id="nav-privacy" onclick="showView('privacy')">गोपनीयता नीति (Privacy Policy)</span>
-                <span class="static-nav-link" id="nav-terms" onclick="showView('terms')">नियम और शर्तें (Terms)</span>
+                <span class="static-nav-link active" id="nav-home" onclick="filterFeed('all', this)">होम (Home)</span>
+                <span class="static-nav-link" id="nav-latest" onclick="filterFeed('latest', this)">नवीनतम (Latest)</span>
+                <span class="static-nav-link" id="nav-trending" onclick="filterFeed('trending', this)">लोकप्रिय (Trending)</span>
+                <span class="static-nav-link" id="nav-members" onclick="filterFeed('members', this)">मेम्बर्स ओनली (Members Only)</span>
+                <span class="static-nav-link" id="nav-newsletter" onclick="scrollToNewsletter(this)">न्यूज़लेटर (Subscribe)</span>
             </div>
         </div>
     </nav>
@@ -241,8 +241,32 @@
         </main>
 
         <!-- Footer -->
-        <footer>
-            <p>&copy; 2026 <span id="siteFooterTitle">ऑटो-ब्लॉगर</span> | सभी अधिकार सुरक्षित।</p>
+        <footer class="site-footer">
+            <div class="footer-grid">
+                <div class="footer-column footer-brand-col">
+                    <h4 id="siteFooterTitle">Auto-Blogging Portal</h4>
+                    <p class="footer-tagline">AI-Powered Premium Publishing Platform</p>
+                    <div class="footer-copyright">&copy; 2026. All rights reserved.</div>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="javascript:void(0)" onclick="showView('about')">हमारे बारे में (About)</a></li>
+                        <li><a href="javascript:void(0)" onclick="showView('contact')">संपर्क करें (Contact)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="javascript:void(0)" onclick="showView('privacy')">गोपनीयता नीति (Privacy Policy)</a></li>
+                        <li><a href="javascript:void(0)" onclick="showView('terms')">नियम और शर्तें (Terms & Conditions)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Shortcut</h4>
+                    <p class="footer-shortcut-text">Press <code>Ctrl + Shift + Z</code> on the home page to access the portal dashboard.</p>
+                </div>
+            </div>
         </footer>
     </div>
 
@@ -251,6 +275,7 @@
         let searchQuery = '';
         let timer = null;
         window.siteSettings = {};
+        let activeFeedFilter = 'all';
 
         // ----------------------------------------------------
         // Configuration / Dynamic Settings Loader
@@ -333,9 +358,12 @@
             views.forEach(v => {
                 const view = document.getElementById(`${v}View`);
                 if (view) view.style.display = 'none';
-                
-                const linkId = v === 'main' ? 'nav-home' : `nav-${v}`;
-                const link = document.getElementById(linkId);
+            });
+
+            // Clear active class from all header navigation links
+            const navIds = ['nav-home', 'nav-latest', 'nav-trending', 'nav-members'];
+            navIds.forEach(id => {
+                const link = document.getElementById(id);
                 if (link) link.classList.remove('active');
             });
 
@@ -343,17 +371,37 @@
             const targetView = document.getElementById(`${targetViewId}View`);
             if (targetView) targetView.style.display = 'block';
 
-            const activeLinkId = viewId === 'home' ? 'nav-home' : `nav-${viewId}`;
-            const activeLink = document.getElementById(activeLinkId);
-            if (activeLink) activeLink.classList.add('active');
-            
             if (viewId === 'home') {
+                const activeLink = document.getElementById('nav-home');
+                if (activeLink) activeLink.classList.add('active');
                 if (hero) hero.style.display = 'block';
             } else {
                 if (hero) hero.style.display = 'none';
             }
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterFeed(filterType, el) {
+            activeFeedFilter = filterType;
+            
+            const navLinks = document.querySelectorAll('.static-nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            if (el) el.classList.add('active');
+            
+            showView('home');
+            loadPosts();
+        }
+
+        function scrollToNewsletter(el) {
+            const navLinks = document.querySelectorAll('.static-nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            const newsletterSection = document.getElementById('bottomNewsletterBox');
+            if (newsletterSection) {
+                newsletterSection.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         // Hidden Admin Secret Key Handler (Ctrl + Shift + Z)
@@ -558,6 +606,14 @@
             fetch(url)
                 .then(res => res.json())
                 .then(posts => {
+                    // Apply client-side feed filters & sorting
+                    if (activeFeedFilter === 'trending') {
+                        posts.sort((a, b) => (b.views || 0) - (a.views || 0));
+                    } else if (activeFeedFilter === 'members') {
+                        posts = posts.filter(post => post.access === 'members');
+                    } else if (activeFeedFilter === 'latest') {
+                        posts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    }
                     if (posts.length === 0) {
                         postsGrid.innerHTML = `
                             <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 50px;">
