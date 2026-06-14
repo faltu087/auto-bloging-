@@ -145,6 +145,7 @@ const dbApi = {
             content: postData.content,
             category: postData.category || 'General',
             status: postData.status || 'published',
+            access: postData.access || 'public', // 'public' or 'members' (Ghost feature)
             seoDescription: postData.seoDescription || '',
             views: 0,
             timestamp: postData.timestamp || new Date().toISOString()
@@ -171,7 +172,6 @@ const dbApi = {
         if (dbType === 'firebase') {
             try {
                 await db.collection('posts').doc(id).delete();
-                // Also clean up associated comments on Firestore
                 const comments = await db.collection('comments').where('postId', '==', id).get();
                 const batch = db.batch();
                 comments.forEach(doc => batch.delete(doc.ref));
@@ -187,7 +187,6 @@ const dbApi = {
             posts = posts.filter(post => post.id !== id);
             writeJsonFile(jsonFilePath, posts);
             
-            // Clean up comments in JSON
             let comments = readJsonFile(commentsFilePath);
             comments = comments.filter(c => c.postId !== id);
             writeJsonFile(commentsFilePath, comments);
@@ -224,7 +223,7 @@ const dbApi = {
     },
 
     // ----------------------------------------------------
-    // COMMENTS API (WordPress style comment loop)
+    // COMMENTS API
     // ----------------------------------------------------
     getComments: async (postId) => {
         if (dbType === 'firebase') {
@@ -390,7 +389,7 @@ const dbApi = {
     },
 
     // ----------------------------------------------------
-    // DASHBOARD STATS API (WordPress "At a Glance" style)
+    // DASHBOARD STATS API
     // ----------------------------------------------------
     getDashboardStats: async () => {
         let totalPosts = 0;

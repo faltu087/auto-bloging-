@@ -1,40 +1,44 @@
 /* Core Theme Variables */
 :root {
     --transition-speed: 0.2s;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
-/* Light Theme (Medium/Substack style) */
+/* Light Theme (Ghost Casper Light style) */
 body.theme-light {
     --bg-color: #ffffff;
-    --text-primary: #191919;
-    --text-secondary: #757575;
-    --border-color: #e6e6e6;
-    --accent-color: #1a8917; /* Medium Green */
-    --accent-hover: #156f12;
-    --input-bg: #fafafa;
-    --success-color: #1a8917;
-    --danger-color: #c92a2a;
-    --card-hover: #f9f9f9;
-    --neutral-badge: #f2f2f2;
-    --dashboard-card: #f8fafc;
+    --text-primary: #090a0b;
+    --text-secondary: #738a94;
+    --border-color: #f0f0f0;
+    --accent-color: #15171a; /* Ghost dark accent */
+    --accent-hover: #30353d;
+    --input-bg: #f4f8fb;
+    --success-color: #a4bdfc;
+    --danger-color: #f05252;
+    --card-hover: #f4f8fb;
+    --neutral-badge: #f4f8fb;
+    --dashboard-card: #f4f8fb;
+    --hero-bg: #15171a;
+    --hero-text: #ffffff;
 }
 
-/* Dark Theme (Hashnode style) */
+/* Dark Theme (Ghost Casper Dark style) */
 body.theme-dark {
-    --bg-color: #0f172a;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --border-color: #1e293b;
-    --accent-color: #38bdf8; /* Clean sky blue */
+    --bg-color: #0c0f14;
+    --text-primary: #f5f6f7;
+    --text-secondary: #8b96a3;
+    --border-color: #1e2530;
+    --accent-color: #38bdf8; /* Accent color */
     --accent-hover: #0ea5e9;
-    --input-bg: #020712;
+    --input-bg: #07090c;
     --success-color: #10b981;
-    --danger-color: #ef4444;
-    --card-hover: #1e293b;
-    --neutral-badge: #1e293b;
-    --dashboard-card: #111827;
+    --danger-color: #f05252;
+    --card-hover: #151b26;
+    --neutral-badge: #151b26;
+    --dashboard-card: #151b26;
+    --hero-bg: #07090c;
+    --hero-text: #f5f6f7;
 }
 
 /* Global Reset & Typography */
@@ -44,15 +48,90 @@ body {
     font-family: var(--font-sans);
     margin: 0;
     padding: 0;
-    line-height: 1.6;
+    line-height: 1.625;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
+/* ----------------------------------------------------
+   Ghost Hero Header Layout (Casper Homepage Style)
+   ---------------------------------------------------- */
+.ghost-hero {
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    padding: 80px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    background-image: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.04) 0%, transparent 60%);
+}
+
+.ghost-hero-content {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.ghost-hero h1 {
+    font-family: var(--font-serif);
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.03em;
+}
+
+.ghost-hero p {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.ghost-hero-signup {
+    display: flex;
+    gap: 8px;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.ghost-hero-signup input {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-radius: 99px;
+    padding: 12px 20px;
+    flex: 1;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.ghost-hero-signup input:focus {
+    border-color: #ffffff;
+}
+
+.ghost-hero-signup button {
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 99px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    transition: background 0.15s;
+}
+
+.ghost-hero-signup button:hover {
+    background: #f0f0f0;
+}
+
+/* Header navbar (Inside page container) */
 .container {
-    max-width: 800px; /* Optimal reading column width + comment sections */
+    max-width: 760px; /* Reading focused column width */
     width: 100%;
     margin: 0 auto;
     padding: 40px 24px;
@@ -62,7 +141,6 @@ body {
     flex-direction: column;
 }
 
-/* Header & Nav */
 header {
     display: flex;
     justify-content: space-between;
@@ -74,19 +152,18 @@ header {
 }
 
 .logo-group h1 {
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-family: var(--font-sans);
+    font-size: 1.25rem;
+    font-weight: 800;
     margin: 0;
     letter-spacing: -0.02em;
+    text-transform: uppercase;
     color: var(--text-primary);
     cursor: pointer;
 }
 
 .logo-group p {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin: 4px 0 0 0;
+    display: none; /* Tagline hidden in Casper top bar */
 }
 
 .nav-links {
@@ -98,7 +175,7 @@ header {
 /* Buttons */
 .btn {
     padding: 8px 16px;
-    border-radius: 99px; /* Rounded pill buttons like Medium/Substack */
+    border-radius: 99px;
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;
@@ -144,7 +221,7 @@ header {
     color: #ffffff;
 }
 
-/* Theme Dropdown */
+/* Theme Selector */
 .theme-selector {
     background: transparent;
     border: 1px solid var(--border-color);
@@ -169,7 +246,7 @@ header {
     color: var(--text-primary);
 }
 
-/* Database & UI Badges */
+/* UI Badges */
 .db-badge {
     background: transparent;
     border: 1px solid var(--border-color);
@@ -185,6 +262,19 @@ header {
 .badge-draft {
     background: var(--neutral-badge);
     color: var(--text-secondary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-right: 6px;
+    display: inline-block;
+}
+
+.badge-access {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #f59e0b;
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 0.7rem;
@@ -228,7 +318,7 @@ header {
     color: var(--bg-color);
 }
 
-/* Static Navigation Links (About, Contact, etc.) */
+/* Static Navigation Links */
 .static-nav {
     display: flex;
     justify-content: center;
@@ -255,12 +345,6 @@ header {
     width: 100%;
 }
 
-.search-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
 .search-input {
     width: 100%;
     padding: 12px 16px;
@@ -279,7 +363,7 @@ header {
     border-color: var(--text-primary);
 }
 
-/* Editorial Blog Feed (Medium/Substack style) */
+/* Editorial Blog Feed (Ghost style) */
 .posts-grid {
     display: flex;
     flex-direction: column;
@@ -312,51 +396,52 @@ header {
 
 .post-title {
     font-family: var(--font-serif);
-    font-size: 1.65rem;
+    font-size: 1.8rem;
     font-weight: 700;
     margin: 0 0 10px 0;
     color: var(--text-primary);
     line-height: 1.25;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
 }
 
 .post-meta {
-    font-size: 0.825rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
     margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .post-content {
-    font-family: var(--font-serif); /* Serif body font for premium reading */
+    font-family: var(--font-serif);
     color: var(--text-primary);
-    font-size: 1.08rem;
-    line-height: 1.7;
+    font-size: 1.12rem;
+    line-height: 1.75;
     white-space: pre-wrap;
     opacity: 0.95;
     margin-bottom: 24px;
 }
 
-/* Rendered images inside post content */
 .post-content img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
-    margin: 15px 0;
+    margin: 20px 0;
     border: 1px solid var(--border-color);
 }
 
-/* Excerpt style */
 .post-excerpt {
     font-family: var(--font-serif);
     color: var(--text-secondary);
-    font-size: 1.05rem;
+    font-size: 1.08rem;
     line-height: 1.65;
     margin-bottom: 14px;
 }
 
 .read-more-link {
-    color: var(--accent-color);
-    text-decoration: none;
+    color: var(--text-primary);
+    text-decoration: underline;
     font-weight: 600;
     font-size: 0.9rem;
     display: inline-flex;
@@ -366,8 +451,39 @@ header {
 }
 
 .read-more-link:hover {
-    color: var(--accent-hover);
-    text-decoration: underline;
+    color: var(--accent-color);
+}
+
+/* ----------------------------------------------------
+   Ghost Paywall / Locker Section (Members Only Content)
+   ---------------------------------------------------- */
+.paywall-lock-box {
+    background: var(--card-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    margin: 24px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.4s ease;
+}
+
+.paywall-lock-box h4 {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    margin: 10px 0 12px 0;
+    color: var(--text-primary);
+}
+
+.paywall-lock-box p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.paywall-lock-icon {
+    font-size: 2.2rem;
 }
 
 /* Social Share buttons */
@@ -400,9 +516,7 @@ header {
     background: var(--card-hover);
 }
 
-/* ----------------------------------------------------
-   Comments Section Layout (WordPress Style)
-   ---------------------------------------------------- */
+/* Comments Section */
 .comments-section {
     margin-top: 40px;
     padding-top: 30px;
@@ -455,23 +569,23 @@ header {
     margin-bottom: 15px;
 }
 
-/* Static Pages Block (About, Contact, etc.) */
+/* Static Pages Block */
 .static-page-content {
     font-family: var(--font-serif);
-    font-size: 1.08rem;
+    font-size: 1.12rem;
     line-height: 1.75;
     color: var(--text-primary);
 }
 
 .static-page-content h2 {
     font-family: var(--font-sans);
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.6rem;
+    font-weight: 800;
     margin-top: 30px;
     margin-bottom: 15px;
 }
 
-/* Newsletter Subscription Box (Substack/Ghost style) */
+/* Newsletter Box */
 .newsletter-box {
     background: var(--card-hover);
     border: 1px solid var(--border-color);
@@ -551,16 +665,13 @@ header {
     border-color: var(--text-primary);
 }
 
-/* ----------------------------------------------------
-   Admin Panel Layout & Dashboard Stats (WordPress Style)
-   ---------------------------------------------------- */
+/* Admin Dashboard Layout & Stats */
 .admin-layout {
     display: grid;
     grid-template-columns: 1fr;
     gap: 30px;
 }
 
-/* At a Glance Stats Widgets */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -591,14 +702,12 @@ header {
     letter-spacing: 0.05em;
 }
 
-/* Two column layout inside active admin tabs */
 .admin-split-layout {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
     gap: 40px;
 }
 
-/* Media Uploader box styles */
 .media-uploader-box {
     border: 2px dashed var(--border-color);
     border-radius: 8px;
@@ -625,7 +734,7 @@ header {
     text-align: left;
 }
 
-/* Quill Editor custom styling to override white background */
+/* Quill Editor styles override */
 .ql-toolbar {
     background: var(--dashboard-card) !important;
     border-color: var(--border-color) !important;
@@ -744,6 +853,11 @@ footer {
     margin-top: auto;
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Responsive UI */
 @media (max-width: 768px) {
     .admin-split-layout {
@@ -751,6 +865,13 @@ footer {
     }
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+    .ghost-hero h1 {
+        font-size: 2.2rem;
+    }
+    .ghost-hero-signup {
+        flex-direction: column;
+        gap: 10px;
     }
     .newsletter-form {
         flex-direction: column;

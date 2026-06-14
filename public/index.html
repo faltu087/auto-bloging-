@@ -4,16 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="siteBrowserTitle">Auto-Blogging Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-dark">
+    
+    <!-- Ghost Casper Style Giant Hero Banner (Homepage only) -->
+    <section class="ghost-hero" id="ghostHero">
+        <div class="ghost-hero-content">
+            <h1 id="heroSiteTitle">Loading Title...</h1>
+            <p id="heroSiteTagline">Loading Description...</p>
+            
+            <!-- Hero Subscription Form -->
+            <form class="ghost-hero-signup" id="heroSignupForm">
+                <input type="email" id="heroEmail" placeholder="yourname@example.com" required>
+                <button type="submit">Subscribe</button>
+            </form>
+            <div id="heroSubscribedMsg" style="display: none; font-size: 1.15rem; font-weight: 600; color: var(--success-color);">
+                🎉 Thank you! You've joined the newsletter.
+            </div>
+        </div>
+    </section>
+
     <div class="container">
-        <!-- Navigation Header -->
+        <!-- Navigation Header (Minimal Ghost Style) -->
         <header>
             <div class="logo-group" onclick="showView('home')">
                 <h1 id="siteMainTitle">Loading Title...</h1>
-                <p id="siteTagline">Loading Tagline...</p>
             </div>
             <div class="nav-links">
                 <span class="db-badge" id="dbTypeBadge">Connecting...</span>
@@ -52,17 +69,15 @@
 
             <!-- Search Container -->
             <div class="search-container">
-                <div class="search-input-wrapper">
-                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 आर्टिकल्स खोजें (Search posts)..." oninput="handleSearch(this.value)">
-                </div>
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 आर्टिकल्स खोजें (Search posts)..." oninput="handleSearch(this.value)">
             </div>
 
             <div class="posts-grid" id="postsGrid">
                 <!-- Posts will render here -->
             </div>
 
-            <!-- Newsletter Box -->
-            <div class="newsletter-box">
+            <!-- Newsletter Box (Ghost style bottom newsletter widget) -->
+            <div class="newsletter-box" id="bottomNewsletterBox">
                 <h3>📧 साप्ताहिक न्यूज़लेटर (Newsletter)</h3>
                 <p>ताज़ा ब्लॉग और ट्रेंडिंग आर्टिकल्स सीधे अपने इनबॉक्स में प्राप्त करने के लिए सब्सक्राइब करें।</p>
                 <form class="newsletter-form" id="newsletterForm">
@@ -128,7 +143,7 @@
         let selectedCategory = 'All';
         let searchQuery = '';
         let timer = null;
-        window.siteSettings = {}; // Global variable to hold settings
+        window.siteSettings = {}; // Global settings object
 
         // ----------------------------------------------------
         // Configuration / Dynamic Settings Loader
@@ -140,14 +155,25 @@
                     window.siteSettings = data;
                     document.getElementById('siteBrowserTitle').innerText = data.siteTitle;
                     document.getElementById('siteMainTitle').innerText = data.siteTitle;
-                    document.getElementById('siteTagline').innerText = data.siteTagline;
+                    document.getElementById('heroSiteTitle').innerText = data.siteTitle;
+                    document.getElementById('heroSiteTagline').innerText = data.siteTagline || data.siteDescription;
                     document.getElementById('siteFooterTitle').innerText = data.siteTitle;
                     
-                    // Reload posts to ensure author name displays
                     loadPosts();
                 });
         }
         loadSettings();
+
+        // Check subscription status in LocalStorage
+        function checkSubscription() {
+            const isSubscribed = localStorage.getItem('is_subscribed') === 'true';
+            if (isSubscribed) {
+                document.getElementById('heroSignupForm').style.display = 'none';
+                document.getElementById('heroSubscribedMsg').style.display = 'block';
+                document.getElementById('bottomNewsletterBox').style.display = 'none';
+            }
+        }
+        checkSubscription();
 
         // ----------------------------------------------------
         // Theme Management Script
@@ -169,7 +195,6 @@
             applyTheme(theme);
         }
 
-        // Initialize Theme
         const savedTheme = localStorage.getItem('blog_theme') || 'dark';
         document.getElementById('themeSelector').value = savedTheme;
         applyTheme(savedTheme);
@@ -185,6 +210,8 @@
         // ----------------------------------------------------
         function showView(viewId) {
             const views = ['main', 'about', 'contact', 'privacy', 'terms'];
+            const hero = document.getElementById('ghostHero');
+            
             views.forEach(v => {
                 const view = document.getElementById(`${v}View`);
                 if (view) view.style.display = 'none';
@@ -195,12 +222,18 @@
 
             document.getElementById(`${viewId}View`).style.display = 'block';
             document.getElementById(`nav-${viewId}`).classList.add('active');
+            
+            // Show Hero banner ONLY on Home page
+            if (viewId === 'home') {
+                hero.style.display = 'block';
+            } else {
+                hero.style.display = 'none';
+            }
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // ----------------------------------------------------
         // Hidden Admin Secret Key Handler (Ctrl + Shift + Z)
-        // ----------------------------------------------------
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z') {
                 e.preventDefault();
@@ -209,11 +242,9 @@
         });
 
         // ----------------------------------------------------
-        // Newsletter Form Handler
+        // Subscription Handlers (Ghost Membership Feature)
         // ----------------------------------------------------
-        document.getElementById('newsletterForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('newsEmail').value;
+        function subscribeUser(email, successCallback) {
             fetch('/api/subscribers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -221,12 +252,26 @@
             })
             .then(res => res.json())
             .then(data => {
-                alert(data.message);
-                document.getElementById('newsletterForm').reset();
+                localStorage.setItem('is_subscribed', 'true');
+                checkSubscription();
+                if (successCallback) successCallback();
+                else alert(data.message);
             })
             .catch(() => {
                 alert('सब्सक्राइब करने में त्रुटि आई।');
             });
+        }
+
+        document.getElementById('heroSignupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('heroEmail').value;
+            subscribeUser(email);
+        });
+
+        document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('newsEmail').value;
+            subscribeUser(email);
         });
 
         function handleContactSubmit(e) {
@@ -236,7 +281,7 @@
         }
 
         // ----------------------------------------------------
-        // Views Count & Inline Expand
+        // Views Count, Comments Loader, & Ghost Locked Paywall
         // ----------------------------------------------------
         function recordView(id) {
             fetch(`/api/posts/${id}/view`, { method: 'POST' })
@@ -249,11 +294,25 @@
                 });
         }
 
-        window.togglePost = function(id) {
+        window.togglePost = function(id, access) {
             const excerpt = document.getElementById(`excerpt_${id}`);
             const content = document.getElementById(`content_${id}`);
             const toggleLink = document.getElementById(`toggle_${id}`);
             const commentBlock = document.getElementById(`comments_section_${id}`);
+            const paywallBlock = document.getElementById(`paywall_${id}`);
+
+            // Access Control: check if members-only post and user is NOT subscribed
+            const isSubscribed = localStorage.getItem('is_subscribed') === 'true';
+            if (access === 'members' && !isSubscribed) {
+                if (paywallBlock.style.display === 'none') {
+                    paywallBlock.style.display = 'block';
+                    toggleLink.innerHTML = 'पढ़ना बंद करें';
+                } else {
+                    paywallBlock.style.display = 'none';
+                    toggleLink.innerHTML = 'Unlock Post 🔒';
+                }
+                return;
+            }
             
             if (content.style.display === 'none') {
                 content.style.display = 'block';
@@ -262,7 +321,7 @@
                 toggleLink.innerHTML = '← छोटी पोस्ट करें';
                 
                 recordView(id); // Record view
-                loadComments(id); // Load comments dynamically
+                loadComments(id); // Load comments
             } else {
                 content.style.display = 'none';
                 commentBlock.style.display = 'none';
@@ -271,9 +330,16 @@
             }
         };
 
-        // ----------------------------------------------------
-        // WordPress Comment Section Loop Logic
-        // ----------------------------------------------------
+        window.unlockPostViaPaywall = function(e, id) {
+            e.preventDefault();
+            const email = document.getElementById(`paywall_email_${id}`).value;
+            subscribeUser(email, () => {
+                // Subscription success callback: hide paywall and expand post content!
+                document.getElementById(`paywall_${id}`).style.display = 'none';
+                togglePost(id, 'public'); // treat as public now since unlocked
+            });
+        };
+
         function loadComments(postId) {
             const list = document.getElementById(`comments_list_${postId}`);
             list.innerHTML = '<div style="font-size:0.85rem;color:var(--text-secondary);">Comments loading...</div>';
@@ -323,9 +389,7 @@
             .then(data => {
                 if (data.success) {
                     document.getElementById(`comment_form_${postId}`).reset();
-                    loadComments(postId); // Reload comment list
-                    
-                    // Increment total comments in any active state if needed
+                    loadComments(postId);
                 } else {
                     alert('टिप्पणी पोस्ट करने में त्रुटि आई।');
                 }
@@ -338,7 +402,6 @@
         // ----------------------------------------------------
         // Data Fetching & Search/Category Filters
         // ----------------------------------------------------
-        // Fetch Database Type
         fetch('/api/db-info')
             .then(res => res.json())
             .then(data => {
@@ -383,19 +446,33 @@
                             year: 'numeric'
                         });
                         
+                        // Calculate reading time (Ghost specificCasper feature)
+                        const cleanContentText = post.content.replace(/<[^>]*>/g, '');
+                        const wordCount = cleanContentText.split(/\s+/).length;
+                        const readTime = Math.max(1, Math.ceil(wordCount / 200)); 
+
                         const excerptLength = 220;
-                        const cleanText = post.content.replace(/<[^>]*>/g, '');
-                        const hasExcerpt = cleanText.length > excerptLength;
-                        const excerpt = hasExcerpt ? cleanText.substr(0, excerptLength) + '...' : cleanText;
+                        const hasExcerpt = cleanContentText.length > excerptLength;
+                        const excerpt = hasExcerpt ? cleanContentText.substr(0, excerptLength) + '...' : cleanContentText;
                         
                         const postUrl = encodeURIComponent(window.location.origin + `#post_${post.id}`);
                         const postText = encodeURIComponent(`Check out this post: ${post.title}`);
+
+                        const isMembersOnly = post.access === 'members';
+                        const accessBadge = isMembersOnly ? '<span class="badge-access">🔒 Members Only</span>' : '';
+                        const readMoreLabel = isMembersOnly ? 'Unlock Post 🔒' : 'पूरी पोस्ट पढ़ें →';
 
                         return `
                             <article class="post-card" id="post_${post.id}">
                                 <div class="post-category">${post.category || 'General'}</div>
                                 <h3 class="post-title">${post.title}</h3>
-                                <div class="post-meta">लेखक: ✍️ ${author} | प्रकाशित: ${date} | 👁️ <span id="views_${post.id}">${post.views || 0} views</span></div>
+                                <div class="post-meta">
+                                    ${accessBadge}
+                                    <span>✍️ ${author}</span>
+                                    <span>• ${date}</span>
+                                    <span>• ⏱️ ${readTime} min read</span>
+                                    <span>• 👁️ <span id="views_${post.id}">${post.views || 0} views</span></span>
+                                </div>
                                 
                                 <!-- Excerpt View -->
                                 <div class="post-excerpt" id="excerpt_${post.id}">
@@ -414,15 +491,23 @@
                                         <a href="https://www.facebook.com/sharer/sharer.php?u=${postUrl}" target="_blank" class="share-btn">🔷 Facebook</a>
                                     </div>
                                 </div>
+
+                                <!-- Members Only Paywall Locker (Ghost feature) -->
+                                <div class="paywall-lock-box" id="paywall_${post.id}" style="display: none;">
+                                    <div class="paywall-lock-icon">🔒</div>
+                                    <h4>यह पोस्ट केवल न्यूज़लेटर सब्सक्राइबर्स के लिए है</h4>
+                                    <p>इस लेख को अनलॉक करने और इसे पूरा पढ़ने के लिए नीचे अपना ईमेल दर्ज करके हमारे फ्री न्यूज़लेटर को सब्सक्राइब करें।</p>
+                                    <form class="newsletter-form" style="max-width:380px; margin:0 auto;" onsubmit="unlockPostViaPaywall(event, '${post.id}')">
+                                        <input type="email" id="paywall_email_${post.id}" class="form-control" placeholder="अपना ईमेल दर्ज करें..." required>
+                                        <button type="submit" class="btn btn-primary">अनलॉक करें</button>
+                                    </form>
+                                </div>
                                 
-                                <!-- Comments Section (WordPress Style, Hidden initially) -->
+                                <!-- Comments Section -->
                                 <div class="comments-section" id="comments_section_${post.id}" style="display: none;">
                                     <h3>💬 टिप्पणियां (Comments)</h3>
-                                    
-                                    <!-- Comments list -->
                                     <div class="comments-list" id="comments_list_${post.id}"></div>
                                     
-                                    <!-- Add Comment Form -->
                                     <div class="comment-form-title">एक टिप्पणी छोड़ें (Leave a Comment)</div>
                                     <form id="comment_form_${post.id}" onsubmit="submitComment(event, '${post.id}')">
                                         <div class="form-group" style="margin-bottom:12px;">
@@ -435,10 +520,10 @@
                                     </form>
                                 </div>
                                 
-                                <!-- Read More -->
+                                <!-- Read More / Toggle link -->
                                 ${hasExcerpt ? `
-                                    <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}')">
-                                        पूरी पोस्ट पढ़ें →
+                                    <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}', '${post.access}')">
+                                        ${readMoreLabel}
                                     </a>
                                 ` : ''}
                             </article>
@@ -450,7 +535,7 @@
                 });
         }
 
-        // Handle search input
+        // Handle search
         function handleSearch(val) {
             clearTimeout(timer);
             searchQuery = val;
@@ -462,7 +547,6 @@
         // Filter by category
         function filterCategory(cat, el) {
             selectedCategory = cat;
-            
             const buttons = document.querySelectorAll('.cat-filter-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
             el.classList.add('active');

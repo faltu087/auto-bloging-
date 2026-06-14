@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Setup Public Uploads Directory (WordPress Media Library feature)
+// Setup Public Uploads Directory
 const uploadsDir = path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -93,7 +93,7 @@ app.get('/api/db-info', (req, res) => {
     res.json({ dbType: db.getDbType() });
 });
 
-// 6. API - Settings Routes (Includes authorName)
+// 6. API - Settings Routes
 app.get('/api/settings', async (req, res) => {
     try {
         const settings = await db.getSettings();
@@ -177,14 +177,14 @@ app.get('/api/posts', async (req, res) => {
     }
 });
 
-// 9. API - Add Blog Post
+// 9. API - Add Blog Post (Includes Ghost 'access' parameter)
 app.post('/api/posts', requireAdmin, async (req, res) => {
-    const { title, content, category, status, seoDescription } = req.body;
+    const { title, content, category, status, seoDescription, access } = req.body;
     if (!title || !content) {
         return res.status(400).json({ error: 'Title and content are required.' });
     }
     try {
-        const newPost = await db.savePost({ title, content, category, status, seoDescription });
+        const newPost = await db.savePost({ title, content, category, status, seoDescription, access });
         res.json({ success: true, post: newPost });
     } catch (err) {
         res.status(500).json({ error: 'Failed to save post.' });
@@ -217,7 +217,7 @@ app.delete('/api/posts/:id', requireAdmin, async (req, res) => {
     }
 });
 
-// 12. API - Comments Routes (WordPress comments loop)
+// 12. API - Comments Routes
 app.get('/api/comments', async (req, res) => {
     const { postId } = req.query;
     if (!postId) return res.status(400).json({ error: 'postId query parameter is required.' });
@@ -242,7 +242,7 @@ app.post('/api/comments', async (req, res) => {
     }
 });
 
-// 13. API - Media Upload (WordPress Media Library backend)
+// 13. API - Media Upload
 app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'Please upload an image file.' });
@@ -251,7 +251,7 @@ app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
     res.json({ success: true, url: fileUrl });
 });
 
-// 14. API - Dashboard Stats (WordPress "At a Glance" status)
+// 14. API - Dashboard Stats
 app.get('/api/stats', requireAdmin, async (req, res) => {
     try {
         const stats = await db.getDashboardStats();
@@ -272,7 +272,7 @@ app.get('*', (req, res) => {
 // Start Server
 app.listen(PORT, () => {
     console.log('='*60);
-    console.log(`[SERVER] Auto-Blogging WordPress Clone is running!`);
+    console.log(`[SERVER] Auto-Blogging Ghost & WordPress Portal is running!`);
     console.log(`[SERVER] URL: http://localhost:${PORT}`);
     console.log(`[SERVER] Admin Panel: http://localhost:${PORT}/admin`);
     console.log('='*60);

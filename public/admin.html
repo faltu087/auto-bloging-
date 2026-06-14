@@ -19,7 +19,7 @@
         <header>
             <div class="logo-group">
                 <h1 id="headerSiteTitle">Admin Dashboard ⚙️</h1>
-                <p>वर्डप्रेस क्लोन कंट्रोल सेंटर (WordPress Clone Panel)</p>
+                <p>वर्डप्रेस और घोस्ट क्लोन कंट्रोल सेंटर (WordPress & Ghost Control Panel)</p>
             </div>
             <div class="nav-links">
                 <a href="/" class="btn btn-secondary">← मुख्य साइट देखें</a>
@@ -27,7 +27,7 @@
             </div>
         </header>
 
-        <!-- "At a Glance" Stats Bar (WordPress Dashboard Widget style) -->
+        <!-- "At a Glance" Stats Bar -->
         <section class="stats-grid">
             <div class="stats-card">
                 <div class="stats-value" id="statPosts">0</div>
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <!-- TAB CONTENT 2: WRITE POST (INCLUDES QUILL & MEDIA UPLOADER) -->
+        <!-- TAB CONTENT 2: WRITE POST (INCLUDES ACCESS TYPE SELECTOR) -->
         <div class="admin-tab-content" id="content-write">
             <div class="admin-split-layout">
                 <!-- Write Post Editor Panel -->
@@ -77,7 +77,7 @@
                             <input type="text" id="title" class="form-control" placeholder="आर्टिकल का नाम लिखें..." required>
                         </div>
                         
-                        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                             <div>
                                 <label for="category">श्रेणी (Category)</label>
                                 <select id="category" class="form-control">
@@ -96,6 +96,13 @@
                                     <option value="draft">ड्राफ्ट (Draft)</option>
                                 </select>
                             </div>
+                            <div>
+                                <label for="access">एक्सेस (Access - *Ghost feature*)</label>
+                                <select id="access" class="form-control">
+                                    <option value="public" selected>सार्वजनिक (Public)</option>
+                                    <option value="members">मेंबर्स केवल (Members Only 🔒)</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -103,7 +110,7 @@
                             <input type="text" id="seoDescription" class="form-control" placeholder="खोज इंजनों के लिए 1-लाइन सारांश...">
                         </div>
 
-                        <!-- WYSIWYG Rich Text Editor (WordPress block/classic editor feel) -->
+                        <!-- WYSIWYG Rich Text Editor -->
                         <div class="form-group">
                             <label>कंटेंट (Blog Content)</label>
                             <div id="editor-container"></div>
@@ -113,7 +120,7 @@
                     </form>
                 </div>
 
-                <!-- WordPress style Media Uploader Sidebar -->
+                <!-- Media Uploader Sidebar -->
                 <div>
                     <h2 style="margin: 0 0 20px 0; font-size: 1.3rem;">📷 मीडिया लाइब्रेरी (Upload Images)</h2>
                     <div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px;">
@@ -212,14 +219,14 @@
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.getElementById(`content-${tabId}`).classList.add('active');
 
-            loadStats(); // Reload stats on every tab change
+            loadStats();
 
             if (tabId === 'posts') loadAdminPosts();
             if (tabId === 'subs') loadSubscribers();
             if (tabId === 'settings') loadSettingsForm();
         }
 
-        // Aggregate statistics from backend (At a Glance dashboard widgets)
+        // Aggregate statistics from backend
         function loadStats() {
             fetch('/api/stats')
                 .then(res => res.json())
@@ -280,7 +287,7 @@
         });
 
         // ----------------------------------------------------
-        // Media Library Uploader (Multer Integration)
+        // Media Library Uploader
         // ----------------------------------------------------
         function handleMediaUpload(input) {
             if (!input.files || input.files.length === 0) return;
@@ -394,11 +401,14 @@
                         
                         const isDraft = post.status === 'draft';
                         const draftBadge = isDraft ? '<span class="badge-draft">Draft</span>' : '';
+                        
+                        const isMembersOnly = post.access === 'members';
+                        const accessBadge = isMembersOnly ? '<span class="badge-access">🔒 Members Only</span>' : '';
 
                         return `
                             <div class="admin-post-item">
                                 <div class="admin-post-info">
-                                    <h3>${draftBadge}${post.title}</h3>
+                                    <h3>${draftBadge}${accessBadge}${post.title}</h3>
                                     <p>${post.category || 'General'} | पब्लिश: ${date} | 👁️ ${post.views || 0} views</p>
                                 </div>
                                 <button class="btn btn-danger" onclick="deletePost('${post.id}')">हटाएं 🗑️</button>
@@ -411,21 +421,20 @@
                 });
         }
 
-        // Form Submit (Write Blog using Quill HTML)
+        // Form Submit (Write Blog using Quill HTML & Access Parameter)
         document.getElementById('postForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const title = document.getElementById('title').value;
             const category = document.getElementById('category').value;
             const status = document.getElementById('status').value;
+            const access = document.getElementById('access').value;
             const seoDescription = document.getElementById('seoDescription').value;
-            
-            // Get content as HTML from Quill editor (WordPress rich text format)
             const content = quill.getSemanticHTML(); 
 
             fetch('/api/posts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, category, status, seoDescription, content })
+                body: JSON.stringify({ title, category, status, seoDescription, content, access })
             })
             .then(res => {
                 if (res.status === 401) {
@@ -439,7 +448,7 @@
                 if (data && data.success) {
                     alert('ब्लॉग सफलतापूर्वक सहेजा गया!');
                     document.getElementById('postForm').reset();
-                    quill.setText(''); // Clear Quill editor
+                    quill.setText('');
                     switchTab('posts');
                 } else {
                     alert('एरर: ' + (data ? data.error : 'सहेजने में विफल'));
@@ -483,7 +492,7 @@
                 });
         });
 
-        // Initialize header title and load stats initially
+        // Initialize header
         fetch('/api/settings')
             .then(res => res.json())
             .then(data => {
