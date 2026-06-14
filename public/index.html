@@ -9,7 +9,40 @@
 </head>
 <body class="theme-dark">
     
-    <!-- Ghost Casper Style Giant Hero Banner (Homepage only) -->
+    <!-- Global Top Header -->
+    <header class="global-header">
+        <div class="header-inner">
+            <div class="logo-group" onclick="showView('home')">
+                <span class="logo-icon">📰</span>
+                <span id="siteMainTitle" class="site-title">Auto-Blogging Portal</span>
+                <span class="db-badge" id="dbTypeBadge">Connecting...</span>
+            </div>
+            
+            <div class="header-actions">
+                <!-- Segmented Theme Switcher -->
+                <div class="theme-switcher-group" id="themeSwitcherGroup">
+                    <button class="theme-btn" id="theme-btn-light" onclick="changeTheme('light')" title="Light Theme">☀️ Light</button>
+                    <button class="theme-btn" id="theme-btn-dark" onclick="changeTheme('dark')" title="Dark Theme">🌙 Dark</button>
+                    <button class="theme-btn" id="theme-btn-system" onclick="changeTheme('system')" title="System Theme">💻 System</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Secondary Navigation Links -->
+    <nav class="navigation-bar">
+        <div class="nav-inner">
+            <div class="static-nav">
+                <span class="static-nav-link active" id="nav-home" onclick="showView('home')">होम (Home)</span>
+                <span class="static-nav-link" id="nav-about" onclick="showView('about')">हमारे बारे में (About)</span>
+                <span class="static-nav-link" id="nav-contact" onclick="showView('contact')">संपर्क करें (Contact)</span>
+                <span class="static-nav-link" id="nav-privacy" onclick="showView('privacy')">गोपनीयता नीति (Privacy Policy)</span>
+                <span class="static-nav-link" id="nav-terms" onclick="showView('terms')">नियम और शर्तें (Terms)</span>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Ghost Casper Style Giant Hero Banner -->
     <section class="ghost-hero" id="ghostHero">
         <div class="ghost-hero-content">
             <h1 id="heroSiteTitle">Loading Title...</h1>
@@ -27,56 +60,33 @@
     </section>
 
     <div class="container">
-        <!-- Navigation Header (Minimal Ghost Style) -->
-        <header>
-            <div class="logo-group" onclick="showView('home')">
-                <h1 id="siteMainTitle">Loading Title...</h1>
-            </div>
-            <div class="nav-links">
-                <span class="db-badge" id="dbTypeBadge">Connecting...</span>
-                
-                <!-- Theme Switcher Selector -->
-                <select class="theme-selector" id="themeSelector" onchange="changeTheme(this.value)">
-                    <option value="light">☀️ Light</option>
-                    <option value="dark" selected>🌙 Dark</option>
-                    <option value="system">🖥️ System</option>
-                </select>
-            </div>
-        </header>
-
-        <!-- Static Pages Navigation Links -->
-        <nav class="static-nav">
-            <span class="static-nav-link active" id="nav-home" onclick="showView('home')">होम (Home)</span>
-            <span class="static-nav-link" id="nav-about" onclick="showView('about')">हमारे बारे में (About)</span>
-            <span class="static-nav-link" id="nav-contact" onclick="showView('contact')">संपर्क करें (Contact)</span>
-            <span class="static-nav-link" id="nav-privacy" onclick="showView('privacy')">गोपनीयता नीति (Privacy Policy)</span>
-            <span class="static-nav-link" id="nav-terms" onclick="showView('terms')">नियम और शर्तें (Terms)</span>
-        </nav>
-
         <!-- Main Blog Posts Section -->
         <main id="mainView">
             
-            <!-- Category Filter Bar -->
-            <div class="category-filter-bar" id="categoryFilterBar">
-                <button class="cat-filter-btn active" onclick="filterCategory('All', this)">All</button>
-                <button class="cat-filter-btn" onclick="filterCategory('Technology', this)">Technology</button>
-                <button class="cat-filter-btn" onclick="filterCategory('Sports', this)">Sports</button>
-                <button class="cat-filter-btn" onclick="filterCategory('Health', this)">Health</button>
-                <button class="cat-filter-btn" onclick="filterCategory('Business', this)">Business</button>
-                <button class="cat-filter-btn" onclick="filterCategory('Science', this)">Science</button>
-                <button class="cat-filter-btn" onclick="filterCategory('General', this)">General</button>
-            </div>
+            <!-- Category and Search Control Row -->
+            <div class="filter-controls-row">
+                <!-- Category Filter Bar -->
+                <div class="category-filter-bar" id="categoryFilterBar">
+                    <button class="cat-filter-btn active" onclick="filterCategory('All', this)">All</button>
+                    <button class="cat-filter-btn" onclick="filterCategory('Technology', this)">Technology</button>
+                    <button class="cat-filter-btn" onclick="filterCategory('Sports', this)">Sports</button>
+                    <button class="cat-filter-btn" onclick="filterCategory('Health', this)">Health</button>
+                    <button class="cat-filter-btn" onclick="filterCategory('Business', this)">Business</button>
+                    <button class="cat-filter-btn" onclick="filterCategory('Science', this)">Science</button>
+                    <button class="cat-filter-btn" onclick="filterCategory('General', this)">General</button>
+                </div>
 
-            <!-- Search Container -->
-            <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 आर्टिकल्स खोजें (Search posts)..." oninput="handleSearch(this.value)">
+                <!-- Search Input Container -->
+                <div class="search-wrapper">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 आर्टिकल्स खोजें (Search)..." oninput="handleSearch(this.value)">
+                </div>
             </div>
 
             <div class="posts-grid" id="postsGrid">
                 <!-- Posts will render here -->
             </div>
 
-            <!-- Newsletter Box (Ghost style bottom newsletter widget) -->
+            <!-- Newsletter Box -->
             <div class="newsletter-box" id="bottomNewsletterBox">
                 <h3>📧 साप्ताहिक न्यूज़लेटर (Newsletter)</h3>
                 <p>ताज़ा ब्लॉग और ट्रेंडिंग आर्टिकल्स सीधे अपने इनबॉक्स में प्राप्त करने के लिए सब्सक्राइब करें।</p>
@@ -143,7 +153,7 @@
         let selectedCategory = 'All';
         let searchQuery = '';
         let timer = null;
-        window.siteSettings = {}; // Global settings object
+        window.siteSettings = {};
 
         // ----------------------------------------------------
         // Configuration / Dynamic Settings Loader
@@ -182,6 +192,16 @@
             const body = document.body;
             body.classList.remove('theme-light', 'theme-dark');
             
+            // Set active class on switcher buttons
+            const buttons = ['light', 'dark', 'system'];
+            buttons.forEach(b => {
+                const btn = document.getElementById(`theme-btn-${b}`);
+                if (btn) btn.classList.remove('active');
+            });
+            
+            const currentBtn = document.getElementById(`theme-btn-${theme}`);
+            if (currentBtn) currentBtn.classList.add('active');
+
             if (theme === 'system') {
                 const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 body.classList.add(isDark ? 'theme-dark' : 'theme-light');
@@ -195,12 +215,13 @@
             applyTheme(theme);
         }
 
+        // Initialize Theme
         const savedTheme = localStorage.getItem('blog_theme') || 'dark';
-        document.getElementById('themeSelector').value = savedTheme;
         applyTheme(savedTheme);
 
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (document.getElementById('themeSelector').value === 'system') {
+            const currentTheme = localStorage.getItem('blog_theme') || 'dark';
+            if (currentTheme === 'system') {
                 applyTheme('system');
             }
         });
@@ -216,18 +237,23 @@
                 const view = document.getElementById(`${v}View`);
                 if (view) view.style.display = 'none';
                 
-                const link = document.getElementById(`nav-${v}`);
+                const linkId = v === 'main' ? 'nav-home' : `nav-${v}`;
+                const link = document.getElementById(linkId);
                 if (link) link.classList.remove('active');
             });
 
-            document.getElementById(`${viewId}View`).style.display = 'block';
-            document.getElementById(`nav-${viewId}`).classList.add('active');
+            const targetViewId = viewId === 'home' ? 'main' : viewId;
+            const targetView = document.getElementById(`${targetViewId}View`);
+            if (targetView) targetView.style.display = 'block';
+
+            const activeLinkId = viewId === 'home' ? 'nav-home' : `nav-${viewId}`;
+            const activeLink = document.getElementById(activeLinkId);
+            if (activeLink) activeLink.classList.add('active');
             
-            // Show Hero banner ONLY on Home page
             if (viewId === 'home') {
-                hero.style.display = 'block';
+                if (hero) hero.style.display = 'block';
             } else {
-                hero.style.display = 'none';
+                if (hero) hero.style.display = 'none';
             }
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -242,7 +268,7 @@
         });
 
         // ----------------------------------------------------
-        // Subscription Handlers (Ghost Membership Feature)
+        // Subscription Handlers
         // ----------------------------------------------------
         function subscribeUser(email, successCallback) {
             fetch('/api/subscribers', {
@@ -301,7 +327,6 @@
             const commentBlock = document.getElementById(`comments_section_${id}`);
             const paywallBlock = document.getElementById(`paywall_${id}`);
 
-            // Access Control: check if members-only post and user is NOT subscribed
             const isSubscribed = localStorage.getItem('is_subscribed') === 'true';
             if (access === 'members' && !isSubscribed) {
                 if (paywallBlock.style.display === 'none') {
@@ -320,8 +345,8 @@
                 excerpt.style.display = 'none';
                 toggleLink.innerHTML = '← छोटी पोस्ट करें';
                 
-                recordView(id); // Record view
-                loadComments(id); // Load comments
+                recordView(id);
+                loadComments(id);
             } else {
                 content.style.display = 'none';
                 commentBlock.style.display = 'none';
@@ -334,9 +359,8 @@
             e.preventDefault();
             const email = document.getElementById(`paywall_email_${id}`).value;
             subscribeUser(email, () => {
-                // Subscription success callback: hide paywall and expand post content!
                 document.getElementById(`paywall_${id}`).style.display = 'none';
-                togglePost(id, 'public'); // treat as public now since unlocked
+                togglePost(id, 'public');
             });
         };
 
@@ -402,20 +426,25 @@
         // ----------------------------------------------------
         // Data Fetching & Search/Category Filters
         // ----------------------------------------------------
+        // Fetch Database Info (Renders clean styling with dots)
         fetch('/api/db-info')
             .then(res => res.json())
             .then(data => {
                 const badge = document.getElementById('dbTypeBadge');
                 if (data.dbType === 'firebase') {
                     badge.innerHTML = '🔥 Firebase';
-                    badge.style.borderColor = 'rgba(245, 130, 13, 0.4)';
-                    badge.style.color = '#f5820d';
+                    badge.className = 'db-badge db-firebase';
                 } else {
                     badge.innerHTML = '📁 Local JSON';
+                    badge.className = 'db-badge db-local';
                 }
             })
             .catch(() => {
-                document.getElementById('dbTypeBadge').innerHTML = 'Offline';
+                const badge = document.getElementById('dbTypeBadge');
+                if (badge) {
+                    badge.innerHTML = 'Offline';
+                    badge.className = 'db-badge';
+                }
             });
 
         function loadPosts() {
@@ -446,7 +475,6 @@
                             year: 'numeric'
                         });
                         
-                        // Calculate reading time (Ghost specificCasper feature)
                         const cleanContentText = post.content.replace(/<[^>]*>/g, '');
                         const wordCount = cleanContentText.split(/\s+/).length;
                         const readTime = Math.max(1, Math.ceil(wordCount / 200)); 
@@ -492,7 +520,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Members Only Paywall Locker (Ghost feature) -->
+                                <!-- Members Only Paywall Locker -->
                                 <div class="paywall-lock-box" id="paywall_${post.id}" style="display: none;">
                                     <div class="paywall-lock-icon">🔒</div>
                                     <h4>यह पोस्ट केवल न्यूज़लेटर सब्सक्राइबर्स के लिए है</h4>
@@ -520,7 +548,7 @@
                                     </form>
                                 </div>
                                 
-                                <!-- Read More / Toggle link -->
+                                <!-- Read More -->
                                 ${hasExcerpt ? `
                                     <a href="javascript:void(0)" class="read-more-link" id="toggle_${post.id}" onclick="togglePost('${post.id}', '${post.access}')">
                                         ${readMoreLabel}
